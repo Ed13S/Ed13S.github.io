@@ -44,7 +44,7 @@ layout: null
 
         // Counter for this page header
         const listCount = document.querySelectorAll('ul li').length;
-        document.getElementById('p-count').innerText = listCount + 43;
+        document.getElementById('p-count').innerText = listCount + 42;
     </script>
 </body>
 </html>
