@@ -58,7 +58,7 @@ layout: null
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data, 'text/html');
                 const listCount = doc.querySelectorAll('ul li').length;
-                document.getElementById('p-count').innerText = listCount + 43;
+                document.getElementById('p-count').innerText = listCount + 42;
             });
     </script>
 </body>
