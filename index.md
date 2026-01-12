@@ -1,54 +1,66 @@
-:root {
-    --bg-color: #e0d7ff; 
-    --text-color: blue;
-    --border-color: blue;
-}
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://img.icons8.com/color/48/security-shield.png" type="image/png">
+    <title>EDDIE13S</title>
+</head>
+<body>
 
-[data-theme="dark"] {
-    --bg-color: #1a0033; 
-    --text-color: #00eaff;
-    --border-color: #00eaff;
-}
+    <div class="custom-header">
+        <div class="inner-header">
+            <span>EDDIE13S</span>
+            <div class="nav-links">
+                <a href="index.html">About me</a>
+                <a href="projects.html">Projects (<span id="p-count">...</span>)</a>
+                <button id="theme-toggle">Toggle Mode</button>
+            </div>
+        </div>
+    </div>
 
-body {
-    font-family: monospace;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
-    transition: 0.3s;
-    min-height: 100vh; /* Ensures purple covers the whole screen even if page is short */
-}
+    <div class="container">
+        <p>My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
+    </div>
 
-.custom-header {
-    border: 3px solid var(--border-color);
-    padding: 10px;
-    margin: 20px;
-}
+    <script>
+        // Precise Age Calculation
+        function calculateAge(birthDate) {
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+        document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
-.inner-header {
-    border: 2px solid var(--border-color);
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-}
+        // Dark Mode Logic
+        const btn = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
 
-.nav-links a, #theme-toggle {
-    color: var(--border-color);
-    text-decoration: none;
-    margin-left: 15px;
-    background: none;
-    border: 1px solid var(--border-color);
-    padding: 5px 10px;
-    cursor: pointer;
-    font-family: monospace;
-}
+        btn.addEventListener('click', () => {
+            let theme = document.documentElement.getAttribute('data-theme');
+            let newTheme = theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
 
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px;
-}
+        // Project Counter + 43
+        fetch('projects.html')
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                const listCount = doc.querySelectorAll('ul li').length;
+                document.getElementById('p-count').innerText = listCount + 43;
+            });
+    </script>
+</body>
+</html>
