@@ -2,8 +2,9 @@
 layout: null
 ---
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
     <title>About Me | EDDIE13S</title>
 </head>
@@ -13,43 +14,38 @@ layout: null
         <div class="inner-header">
             <span>EDDIE13S</span>
             <div class="nav-links">
-                <a href="index.html">About me</a>
-                <a href="projects.html">Projects (<span id="p-count">0</span>)</a>
-                <a href="https://formspree.io/f/xykkyyjj">Feedback</a>
-                <button id="theme-toggle">Dark Mode</button>
+                <a href="index.html">About</a>
+                <a href="projects.html">Projects</a>
+                <button id="theme-toggle">Toggle Mode</button>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <h1>About Me</h1>
-        <p>My name is Eddie, I am a cybersecurity student. I am {{ "now" | date: "%Y" | minus: 2010 }} years old. 
-        I like to program software relating to cyber security. Feel free to check out my projects on the next page.</p>
+        <h1>System.About(Eddie)</h1>
+        <p><strong>Status:</strong> Cybersecurity Student</p>
+        <p><strong>Age:</strong> {{ "now" | date: "%Y" | minus: 2010 }}</p>
+        <p>My name is Eddie. I program software relating to cyber security. This site is hosted on GitHub Pages for maximum security and zero-database vulnerabilities.</p>
         
-        <p>Currently, I am tracking <span id="p-count-body">0</span> projects on this site.</p>
+        <hr>
+        <p>Use the navigation above to view my projects or send feedback.</p>
     </div>
 
     <script>
-        // DARK MODE LOGIC
-        const toggle = document.getElementById('theme-toggle');
-        toggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', targetTheme);
-            toggle.innerText = targetTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
-        });
+        const btn = document.getElementById('theme-toggle');
+        // Check for saved user preference
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+        }
 
-        // PROJECT COUNTER LOGIC
-        // This fetches your projects page and counts the <li> tags!
-        fetch('projects.html')
-            .then(response => response.text())
-            .then(data => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data, 'text/html');
-                const count = doc.querySelectorAll('ul li').length;
-                document.getElementById('p-count').innerText = count;
-                document.getElementById('p-count-body').innerText = count;
-            });
+        btn.addEventListener('click', () => {
+            let theme = document.documentElement.getAttribute('data-theme');
+            let newTheme = theme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme); // Remember choice
+        });
     </script>
 </body>
 </html>
