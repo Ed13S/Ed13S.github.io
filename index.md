@@ -1,19 +1,35 @@
 ---
-layout: default
+layout: null
 ---
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <title>EDDIE13S</title>
+</head>
+<body>
 
-# About Me
+    <div class="custom-header">
+        <div class="inner-header">
+            <span>EDDIE13S</span>
+            <div class="nav-links">
+                <a href="https://eddie13s.wordpress.com">About me</a>
+                <a href="https://formspree.io/f/xykkyyjj">Feedback</a>
+            </div>
+        </div>
+    </div>
 
-My name is Eddie, I am {{ "now" | date: "%Y" | minus: 2010 }} years old. 
-I like to program software relating to cyber security. 
+    <h1>About Me</h1>
+    <p>My name is Eddie, I am {{ "now" | date: "%Y" | minus: 2010 }} years old. 
+    I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
 
-### 🌐 My Projects
-Feel free to check out my projects below additionally at my other website.
+    <hr>
+    
+    <h3>🌐 Projects</h3>
+    <ul>
+        <li><a href="https://tinyurl.com/Siaoq1">Siaoq1</a></li>
+        <li><a href="https://tinyurl.com/Idle-website">Idle Website</a></li>
+    </ul>
 
-* [Main Blog](https://eddie13s.wordpress.com)
-* [Other Project](https://sites.google.com/view/ed-13/home)
-
----
-
-### 📩 Contact
-[![Message Me](https://img.shields.io/badge/SEND%20MESSAGE-Formspree-db4437?style=for-the-badge&logo=maildotru&logoColor=white)](https://formspree.io/f/xykkyyjj)
+</body>
+</html>
