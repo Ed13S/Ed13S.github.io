@@ -1,56 +1,62 @@
-/* Layout & Font */
+:root {
+    --bg-color: #f4f4f4;
+    --text-color: #333;
+    --header-bg: #e0d7ff;
+    --border-color: blue;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --text-color: #f4f4f4;
+    --header-bg: #2a0066;
+    --border-color: #00eaff; /* Cyan for better visibility in dark mode */
+}
+
 body {
     font-family: monospace;
-    background-color: #f4f4f4;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0;
     padding: 0;
     line-height: 1.6;
-    color: #333;
+    transition: 0.3s; /* Smooth color fade */
 }
 
-/* The Blue Double-Box Header */
 .custom-header {
-    border: 3px solid blue;
+    border: 3px solid var(--border-color);
     padding: 10px;
-    background-color: #e0d7ff; /* Light Lavender */
+    background-color: var(--header-bg);
     margin: 20px;
 }
 
 .inner-header {
-    border: 2px solid blue;
+    border: 2px solid var(--border-color);
     padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: blue;
-    font-weight: bold;
-    font-size: 1.2rem;
+    color: var(--border-color);
 }
 
 .nav-links a {
-    color: blue;
+    color: var(--border-color);
     text-decoration: none;
     margin-left: 15px;
-    font-size: 0.9rem;
 }
 
-.nav-links a:hover {
-    text-decoration: underline;
-}
-
-/* Main Content Area */
 .container {
     max-width: 800px;
     margin: 40px auto;
     padding: 0 20px;
 }
 
-h1 {
-    color: #222;
-}
-
-hr {
-    border: 0;
-    border-top: 1px solid #ccc;
-    margin: 20px 0;
+/* Dark Mode Button Style */
+#theme-toggle {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--border-color);
+    cursor: pointer;
+    font-family: monospace;
+    padding: 2px 8px;
+    margin-left: 15px;
 }
