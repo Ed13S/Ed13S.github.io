@@ -22,10 +22,23 @@ layout: null
     </div>
 
     <div class="container">
-        <p>My name is Eddie, I am {{ "now" | date: "%Y" | minus: 2010 }}. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
+        <p>My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
     </div>
 
     <script>
+        // PRECISE AGE CALCULATION
+        function calculateAge(birthDate) {
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+        // Set your birthday: March 6, 2010
+        document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
+
         // DARK MODE
         const btn = document.getElementById('theme-toggle');
         const currentTheme = localStorage.getItem('theme');
