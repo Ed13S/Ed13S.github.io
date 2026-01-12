@@ -6,6 +6,7 @@ layout: null
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://img.icons8.com/color/48/security-shield.png" type="image/png">
     <title>EDDIE13S</title>
 </head>
 <body>
@@ -36,7 +37,6 @@ layout: null
             }
             return age;
         }
-        // Set your birthday: March 6, 2010
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
         // DARK MODE
