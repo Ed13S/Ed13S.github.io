@@ -2,8 +2,9 @@
 layout: null
 ---
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
     <title>Projects | EDDIE13S</title>
 </head>
@@ -13,30 +14,37 @@ layout: null
         <div class="inner-header">
             <span>EDDIE13S</span>
             <div class="nav-links">
-                <a href="index.html">About me</a>
-                <a href="projects.html">Projects</a>
-                <a href="https://formspree.io/f/xykkyyjj">Feedback</a>
-                <button id="theme-toggle">Dark Mode</button>
+                <a href="index.html">About</a>
+                <a href="projects.html">Projects (<span id="p-count">...</span>)</a>
+                <button id="theme-toggle">Toggle Mode</button>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <h1>My Projects</h1>
+        <h1>Directory: /Projects</h1>
         <ul>
-            <li><strong>Scratch Profile(43 Projects):</strong> <a href="https://tinyurl.com/Siaoq1">View Profile</a></li>
+            <li><strong>Siaoq1:</strong> <a href="https://tinyurl.com/Siaoq1">View Project</a></li>
             <li><strong>Idle Website:</strong> <a href="https://tinyurl.com/Idle-website">Visit Site</a></li>
         </ul>
+        <p><em>+ 43 archived projects managed externally.</em></p>
     </div>
 
     <script>
-        const toggle = document.getElementById('theme-toggle');
-        toggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', targetTheme);
-            toggle.innerText = targetTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        const btn = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
+
+        btn.addEventListener('click', () => {
+            let theme = document.documentElement.getAttribute('data-theme');
+            let newTheme = theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
         });
+
+        // Counter for this page header
+        const listCount = document.querySelectorAll('ul li').length;
+        document.getElementById('p-count').innerText = listCount + 43;
     </script>
 </body>
 </html>
