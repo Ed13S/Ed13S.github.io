@@ -38,7 +38,7 @@ layout: null
             }
             return age;
         }
-        document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
+        document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 3, 6));
 
         // DARK MODE LOGIC
         const btn = document.getElementById('theme-toggle');
