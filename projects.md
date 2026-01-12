@@ -6,6 +6,7 @@ layout: null
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://img.icons8.com/color/48/security-shield.png" type="image/png">
     <title>Projects | EDDIE13S</title>
 </head>
 <body>
