@@ -15,7 +15,7 @@ layout: null
             <span>EDDIE13S</span>
             <div class="nav-links">
                 <a href="index.html">About</a>
-                <a href="projects.html">Projects</a>
+                <a href="projects.html">Projects (<span id="p-count">...</span>)</a>
                 <button id="theme-toggle">Toggle Mode</button>
             </div>
         </div>
@@ -28,24 +28,33 @@ layout: null
         <p>My name is Eddie. I program software relating to cyber security. This site is hosted on GitHub Pages for maximum security and zero-database vulnerabilities.</p>
         
         <hr>
-        <p>Use the navigation above to view my projects or send feedback.</p>
+        <p>Currently overseeing <strong><span id="p-count-body">...</span></strong> active projects across all platforms.</p>
     </div>
 
     <script>
+        // DARK MODE LOGIC
         const btn = document.getElementById('theme-toggle');
-        // Check for saved user preference
         const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            document.documentElement.setAttribute('data-theme', currentTheme);
-        }
+        if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
 
         btn.addEventListener('click', () => {
             let theme = document.documentElement.getAttribute('data-theme');
             let newTheme = theme === 'dark' ? 'light' : 'dark';
-            
             document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme); // Remember choice
+            localStorage.setItem('theme', newTheme);
         });
+
+        // PROJECT COUNTER + 43
+        fetch('projects.html')
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                const listCount = doc.querySelectorAll('ul li').length;
+                const totalCount = listCount + 43; // Adding your 43 projects
+                document.getElementById('p-count').innerText = totalCount;
+                document.getElementById('p-count-body').innerText = totalCount;
+            });
     </script>
 </body>
 </html>
