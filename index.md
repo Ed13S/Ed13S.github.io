@@ -28,7 +28,7 @@ layout: null
     </div>
 
     <script>
-        // Precise Age Calculation
+        // PRECISE AGE CALCULATION (March 6, 2010)
         function calculateAge(birthDate) {
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
@@ -40,7 +40,7 @@ layout: null
         }
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
-        // Dark Mode Logic
+        // DARK MODE LOGIC
         const btn = document.getElementById('theme-toggle');
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
@@ -52,7 +52,7 @@ layout: null
             localStorage.setItem('theme', newTheme);
         });
 
-        // Project Counter + 43
+        // PROJECT COUNTER LOGIC (+ 43)
         fetch('projects.html')
             .then(response => response.text())
             .then(data => {
