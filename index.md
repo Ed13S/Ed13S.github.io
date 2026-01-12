@@ -5,7 +5,6 @@ layout: null
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-Frame-Options" content="DENY">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="https://img.icons8.com/color/48/security-shield.png" type="image/png">
     <title>EDDIE13S</title>
@@ -37,7 +36,7 @@ layout: null
             }
             return age;
         }
-        document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 3, 6));
+        document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
         const btn = document.getElementById('theme-toggle');
         const currentTheme = localStorage.getItem('theme');
@@ -56,7 +55,7 @@ layout: null
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data, 'text/html');
                 const listCount = doc.querySelectorAll('ul li').length;
-                document.getElementById('p-count').innerText = listCount + 42;
+                document.getElementById('p-count').innerText = listCount + 43;
             });
     </script>
 </body>
