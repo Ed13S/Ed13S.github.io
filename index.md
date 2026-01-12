@@ -13,14 +13,14 @@ layout: null
         <div class="inner-header">
             <span>EDDIE13S</span>
             <div class="nav-links">
-                <a href="https://eddie13s.wordpress.com">About me</a>
+                <a href="index.html">About me</a>
                 <a href="https://formspree.io/f/xykkyyjj">Feedback</a>
             </div>
         </div>
     </div>
 
     <h1>About Me</h1>
-    <p>My name is Eddie, I am {{ "now" | date: "%Y" | minus: 2010 }} years old. 
+    <p>My name is Eddie, I am a cybersecurity student. I am {{ "now" | date: "%Y" | minus: 2010 }} years old. 
     I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
 
     <hr>
