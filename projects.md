@@ -14,20 +14,18 @@ layout: null
         <div class="inner-header">
             <span>EDDIE13S</span>
             <div class="nav-links">
-                <a href="index.html">About</a>
-                <a href="projects.html">Projects (<span id="p-count">...</span>)</a>
+                <a href="index.html">About me</a>
+                <a href="projects.html">Projects</a>
                 <button id="theme-toggle">Toggle Mode</button>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <h1>Directory: /Projects</h1>
         <ul>
             <li><strong>Siaoq1:</strong> <a href="https://tinyurl.com/Siaoq1">View Project</a></li>
             <li><strong>Idle Website:</strong> <a href="https://tinyurl.com/Idle-website">Visit Site</a></li>
         </ul>
-        <p><em>+ 43 archived projects managed externally.</em></p>
     </div>
 
     <script>
@@ -41,10 +39,6 @@ layout: null
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         });
-
-        // Counter for this page header
-        const listCount = document.querySelectorAll('ul li').length;
-        document.getElementById('p-count').innerText = listCount + 42;
     </script>
 </body>
 </html>
