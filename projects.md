@@ -16,23 +16,27 @@ layout: null
                 <a href="index.html">About me</a>
                 <a href="projects.html">Projects</a>
                 <a href="https://formspree.io/f/xykkyyjj">Feedback</a>
+                <button id="theme-toggle">Dark Mode</button>
             </div>
         </div>
     </div>
 
     <div class="container">
         <h1>My Projects</h1>
-        <p>Here are some of the software projects I have developed:</p>
-        
         <ul>
             <li><strong>Siaoq1:</strong> <a href="https://tinyurl.com/Siaoq1">View Project</a></li>
             <li><strong>Idle Website:</strong> <a href="https://tinyurl.com/Idle-website">Visit Site</a></li>
         </ul>
-
-        <hr>
-        <h3>Interested in Collaboration?</h3>
-        <p>If you have questions about my code or want to report a bug, use the feedback link in the header.</p>
     </div>
 
+    <script>
+        const toggle = document.getElementById('theme-toggle');
+        toggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', targetTheme);
+            toggle.innerText = targetTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        });
+    </script>
 </body>
 </html>
