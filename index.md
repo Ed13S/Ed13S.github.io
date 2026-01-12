@@ -24,44 +24,49 @@ layout: null
 
         <p>My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
 
-        <a href="feedback.html" class="post-card">
-            <div class="post-date">January 11, 2023</div>
-            <span class="post-title">Feedback Form</span>
-            <div class="post-category">Uncategorized</div>
-        </a>
+        <input type="text" id="post-search" placeholder="Search posts (e.g. GitHub, Project, Profile)...">
 
-        <a href="https://github.com/Ed13S" class="post-card">
-            <div class="post-date">January 11, 2023</div>
-            <span class="post-title">Check out my profile at GitHub @Ed13S</span>
-            <div class="post-category">Information, Profiles</div>
-        </a>
+        <div id="posts-container">
+            <a href="feedback.html" class="post-card">
+                <div class="post-date">January 11, 2023</div>
+                <span class="post-title">Feedback Form</span>
+                <div class="post-category">Uncategorized</div>
+            </a>
 
-        <a href="feedback.html" class="post-card">
-            <div class="post-date">January 12, 2026</div>
-            <span class="post-title">Contact Me Form</span>
-            <div class="post-category">Uncategorized</div>
-        </a>
+            <a href="https://github.com/Ed13S" class="post-card">
+                <div class="post-date">January 11, 2023</div>
+                <span class="post-title">Check out my profile at GitHub @Ed13S</span>
+                <div class="post-category">Information, Profiles</div>
+            </a>
 
-        <a href="https://otp-secret-messages--Eddie13S.replit.app" class="post-card">
-            <div class="post-date">January 24, 2023</div>
-            <span class="post-title">My favourite project</span>
-            <div class="post-category">Programs</div>
-        </a>
+            <a href="feedback.html" class="post-card">
+                <div class="post-date">January 12, 2026</div>
+                <span class="post-title">Contact Me Form</span>
+                <div class="post-category">Uncategorized</div>
+            </a>
 
-        <a href="https://scratch.mit.edu/users/ED13SED13s/" class="post-card">
-            <div class="post-date">January 14, 2023</div>
-            <span class="post-title">Scratch profile</span>
-            <div class="post-category">Information, Profiles</div>
-        </a>
+            <a href="https://4d6ecdd3-c85a-471c-acd1-eee25a7fc9d9-00-189dxo5bne2nc.picard.replit.dev/" class="post-card">
+                <div class="post-date">January 24, 2023</div>
+                <span class="post-title">My favourite project</span>
+                <div class="post-category">Programs</div>
+            </a>
 
-        <a href="https://replit.com/@Eddie13S" class="post-card">
-            <div class="post-date">January 11, 2023</div>
-            <span class="post-title">Replit profile</span>
-            <div class="post-category">Information, Profiles</div>
-        </a>
+            <a href="https://scratch.mit.edu/users/ED13SED13s/" class="post-card">
+                <div class="post-date">January 14, 2023</div>
+                <span class="post-title">Scratch profile</span>
+                <div class="post-category">Information, Profiles</div>
+            </a>
+
+            <a href="https://replit.com/@Eddie13S" class="post-card">
+                <div class="post-date">January 11, 2023</div>
+                <span class="post-title">Replit profile</span>
+                <div class="post-category">Information, Profiles</div>
+            </a>
+        </div>
     </div>
 
     <script>
+        // Age Calculation
         function calculateAge(birthDate) {
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
@@ -71,15 +76,32 @@ layout: null
         }
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
+        // Dark Mode Logic
         const btn = document.getElementById('theme-toggle');
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
-
         btn.addEventListener('click', () => {
             let theme = document.documentElement.getAttribute('data-theme');
             let newTheme = theme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
+        });
+
+        // SEARCH LOGIC
+        const searchInput = document.getElementById('post-search');
+        const posts = document.querySelectorAll('.post-card');
+
+        searchInput.addEventListener('input', (e) => {
+            const value = e.target.value.toLowerCase();
+            posts.forEach(post => {
+                const title = post.querySelector('.post-title').innerText.toLowerCase();
+                const category = post.querySelector('.post-category').innerText.toLowerCase();
+                if (title.includes(value) || category.includes(value)) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>
