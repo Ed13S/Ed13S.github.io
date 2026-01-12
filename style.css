@@ -16,49 +16,45 @@ body {
     color: var(--text-color);
     margin: 0;
     padding: 0;
-    /* Increased base font size from 1rem to 1.5rem */
-    font-size: 1.5rem; 
-    line-height: 1.8;
+    font-size: 1.2rem; /* Normal readable size */
+    line-height: 1.6;
     transition: 0.3s;
     min-height: 100vh;
 }
 
 .custom-header {
-    border: 5px solid var(--border-color); /* Thicker border */
-    padding: 20px; /* More room inside */
-    margin: 30px;
+    border: 3px solid var(--border-color);
+    padding: 10px;
+    margin: 15px; /* Smaller margin */
 }
 
 .inner-header {
-    border: 3px solid var(--border-color);
-    padding: 25px;
+    border: 2px solid var(--border-color);
+    padding: 12px; /* Smaller padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-weight: bold;
-    font-size: 2rem; /* Much bigger username and nav */
+    font-size: 1.4rem; /* Balanced header size */
 }
 
 .nav-links a, #theme-toggle {
     color: var(--border-color);
     text-decoration: none;
-    margin-left: 20px;
+    margin-left: 10px;
     background: none;
-    border: 2px solid var(--border-color);
-    padding: 10px 20px;
+    border: 1px solid var(--border-color);
+    padding: 5px 12px;
     cursor: pointer;
-    font-family: monospace;
-    font-size: 1.2rem;
+    font-size: 1rem;
 }
 
 .container {
-    max-width: 1000px; /* Wider container */
-    margin: 60px auto;
-    padding: 0 40px;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
 }
 
-/* Make the paragraph specifically stand out */
 .container p {
-    font-size: 1.8rem; 
-    font-weight: 500;
+    font-size: 1.4rem; /* Keeps your main bio easy to read */
 }
