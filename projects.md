@@ -24,7 +24,7 @@ layout: null
 
     <div class="container">
         <ul>
-            <li><strong>Siaoq1:</strong> <a href="https://tinyurl.com/Siaoq1">View Project</a></li>
+            <li><strong>Scratch Profile(43 projects):</strong> <a href="https://tinyurl.com/Siaoq1">View Profile</a></li>
             <li><strong>Idle Website:</strong> <a href="https://tinyurl.com/Idle-website">Visit Site</a></li>
         </ul>
     </div>
