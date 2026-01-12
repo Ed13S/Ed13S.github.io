@@ -1,35 +1,30 @@
 :root {
-    --bg-color: #f0f2f5;
-    --text-color: #1a1a1b;
-    --header-bg: #e0d7ff;
-    --card-bg: #ffffff;
-    --border-color: #0000ff;
+    --bg-color: #e0d7ff; /* Lavender background for the whole site */
+    --text-color: blue;   /* Matching your header text color */
+    --border-color: blue;
 }
 
-/* Dark Mode Colors */
 [data-theme="dark"] {
-    --bg-color: #0e1117;
-    --text-color: #c9d1d9;
-    --header-bg: #161b22;
-    --card-bg: #0d1117;
-    --border-color: #58a6ff;
+    --bg-color: #1a0033; /* Darker purple for dark mode */
+    --text-color: #00eaff;
+    --border-color: #00eaff;
 }
 
 body {
-    font-family: 'Courier New', monospace; /* Hacker/Cyber style */
+    font-family: monospace;
     background-color: var(--bg-color);
     color: var(--text-color);
     margin: 0;
-    transition: background-color 0.3s, color 0.3s;
+    padding: 0;
+    line-height: 1.6;
+    transition: 0.3s;
 }
 
 /* Header Styling */
 .custom-header {
     border: 3px solid var(--border-color);
     padding: 10px;
-    background-color: var(--header-bg);
     margin: 20px;
-    box-shadow: 5px 5px 0px var(--border-color); /* Adds a retro depth */
 }
 
 .inner-header {
@@ -38,28 +33,26 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-weight: bold;
 }
 
+/* Navigation & Toggle */
 .nav-links a, #theme-toggle {
     color: var(--border-color);
     text-decoration: none;
     margin-left: 15px;
-    font-weight: bold;
     background: none;
     border: 1px solid var(--border-color);
     padding: 5px 10px;
     cursor: pointer;
+    font-family: monospace;
 }
 
-/* Container & Content "Card" */
+/* Main Content Area - Simplified */
 .container {
     max-width: 800px;
     margin: 40px auto;
-    padding: 30px;
-    background-color: var(--card-bg);
-    border: 2px solid var(--border-color);
-    box-shadow: 8px 8px 0px var(--border-color);
+    padding: 0 20px;
 }
 
-h1 { border-bottom: 2px solid var(--border-color); display: inline-block; }
 a { color: var(--border-color); }
