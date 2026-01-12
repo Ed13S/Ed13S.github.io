@@ -41,6 +41,19 @@ body {
     font-weight: bold;
 }
 
+/* Search Bar Styling */
+#post-search {
+    width: 100%;
+    background: none;
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+    padding: 12px;
+    margin-bottom: 30px;
+    font-family: monospace;
+    font-size: 1rem;
+    outline: none;
+}
+
 /* Post Rectangle Styling */
 .post-card {
     border: 2px solid var(--border-color);
@@ -69,13 +82,4 @@ body {
     border: 1px solid var(--border-color);
     padding: 5px 12px;
     cursor: pointer;
-}
-
-input, textarea {
-    width: 100%;
-    background: none;
-    border: 1px solid var(--border-color);
-    color: var(--text-color);
-    padding: 10px;
-    margin: 10px 0;
 }
