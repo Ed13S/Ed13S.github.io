@@ -1,11 +1,11 @@
 :root {
-    --bg-color: #e0d7ff; /* Lavender background for the whole site */
-    --text-color: blue;   /* Matching your header text color */
+    --bg-color: #e0d7ff; /* Full Lavender */
+    --text-color: blue;
     --border-color: blue;
 }
 
 [data-theme="dark"] {
-    --bg-color: #1a0033; /* Darker purple for dark mode */
+    --bg-color: #1a0033; 
     --text-color: #00eaff;
     --border-color: #00eaff;
 }
@@ -20,7 +20,6 @@ body {
     transition: 0.3s;
 }
 
-/* Header Styling */
 .custom-header {
     border: 3px solid var(--border-color);
     padding: 10px;
@@ -36,7 +35,6 @@ body {
     font-weight: bold;
 }
 
-/* Navigation & Toggle */
 .nav-links a, #theme-toggle {
     color: var(--border-color);
     text-decoration: none;
@@ -48,11 +46,8 @@ body {
     font-family: monospace;
 }
 
-/* Main Content Area - Simplified */
 .container {
     max-width: 800px;
     margin: 40px auto;
     padding: 0 20px;
 }
-
-a { color: var(--border-color); }
