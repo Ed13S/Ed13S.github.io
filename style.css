@@ -2,12 +2,14 @@
     --bg-color: #e0d7ff; 
     --text-color: blue;
     --border-color: blue;
+    --shadow-color: rgba(0, 0, 255, 0.2); /* The "shaded" second square */
 }
 
 [data-theme="dark"] {
     --bg-color: #1a0033; 
     --text-color: #00eaff;
     --border-color: #00eaff;
+    --shadow-color: rgba(0, 234, 255, 0.2);
 }
 
 body {
@@ -15,9 +17,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     margin: 0; padding: 0;
-    font-size: 1.1rem;
     transition: 0.3s;
-    min-height: 100vh;
 }
 
 .container {
@@ -26,10 +26,24 @@ body {
     padding: 0 20px;
 }
 
-.custom-header {
+/* THE NEUBRUTALISM CARD EFFECT */
+.custom-header, .post-card {
+    background-color: var(--bg-color);
     border: 3px solid var(--border-color);
-    padding: 10px;
+    padding: 15px;
     margin-bottom: 30px;
+    text-decoration: none;
+    display: block;
+    color: var(--text-color);
+    /* This creates the "second square" offset effect */
+    box-shadow: 8px 8px 0px var(--shadow-color);
+    transition: all 0.2s;
+}
+
+.post-card:hover {
+    /* Moves the card slightly when hovered */
+    transform: translate(-2px, -2px);
+    box-shadow: 12px 12px 0px var(--shadow-color);
 }
 
 .inner-header {
@@ -41,45 +55,24 @@ body {
     font-weight: bold;
 }
 
-/* Search Bar Styling */
 #post-search {
     width: 100%;
-    background: none;
-    border: 2px solid var(--border-color);
+    background: var(--bg-color);
+    border: 3px solid var(--border-color);
     color: var(--text-color);
     padding: 12px;
     margin-bottom: 30px;
     font-family: monospace;
-    font-size: 1rem;
-    outline: none;
+    box-shadow: 5px 5px 0px var(--shadow-color);
 }
 
-/* Post Rectangle Styling */
-.post-card {
-    border: 2px solid var(--border-color);
-    padding: 15px;
-    margin-bottom: 20px;
-    text-decoration: none;
-    display: block;
-    color: var(--text-color);
-    transition: transform 0.2s;
-}
-
-.post-card:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    transform: scale(1.02);
-}
-
-.post-date { font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8; }
+.post-date, .post-category { font-size: 0.8rem; opacity: 0.8; }
 .post-title { font-size: 1.3rem; font-weight: bold; margin: 5px 0; display: block; }
-.post-category { font-size: 0.8rem; font-style: italic; }
 
-.nav-links a, #theme-toggle, .form-btn {
+.nav-links a, #theme-toggle {
     color: var(--border-color);
     text-decoration: none;
     margin-left: 10px;
-    background: none;
     border: 1px solid var(--border-color);
-    padding: 5px 12px;
-    cursor: pointer;
+    padding: 5px 10px;
 }
