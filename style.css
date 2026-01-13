@@ -3,6 +3,8 @@
     --text-color: blue;
     --border-color: blue;
     --shadow-color: rgba(0, 0, 255, 0.2);
+    /* Pixel Cursor URL */
+    --cursor-url: url('https://ih1.redbubble.net/image.4600717854.9217/st,small,507x507-pad,600x600,f8f8f8.jpg');
 }
 
 [data-theme="dark"] {
@@ -12,7 +14,6 @@
     --shadow-color: rgba(0, 234, 255, 0.2);
 }
 
-/* ADMIN THEME OVERRIDE */
 [data-admin="true"] {
     --border-color: #2ecc71 !important;
     --text-color: #27ae60 !important;
@@ -25,6 +26,13 @@ body {
     color: var(--text-color);
     margin: 0; padding: 0;
     transition: 0.3s;
+    /* Apply Pixel Cursor */
+    cursor: var(--cursor-url) 16 16, auto;
+}
+
+/* Ensure links and buttons also use the pixel pointer */
+a, button, input {
+    cursor: var(--cursor-url) 16 16, pointer !important;
 }
 
 .container {
@@ -33,7 +41,6 @@ body {
     padding: 0 20px;
 }
 
-/* BIG ABOUT ME */
 #about-text {
     font-size: 1.8rem;
     font-weight: bold;
@@ -41,7 +48,6 @@ body {
     margin-bottom: 30px;
 }
 
-/* SHADED BOX EFFECT */
 .custom-header, .post-card, #post-search, #admin-panel {
     background-color: var(--bg-color);
     border: 3px solid var(--border-color);
@@ -72,8 +78,7 @@ body {
     text-decoration: none;
     border: 1px solid var(--border-color);
     padding: 5px 12px;
-    cursor: pointer;
-    font-family: monospace;
+    background: none;
 }
 
 #admin-panel input {
