@@ -1,9 +1,8 @@
 :root {
     --bg-color: #0d0211; 
-    --text-color: #00ff41; /* Classic Matrix Green */
+    --text-color: #00ff41; 
     --border-color: #00ff41;
     --shadow-color: rgba(0, 255, 65, 0.2);
-    --cursor-url: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur');
 }
 
 [data-theme="light"] {
@@ -13,75 +12,45 @@
     --shadow-color: rgba(0, 0, 255, 0.2);
 }
 
-body {
-    font-family: 'Courier New', monospace;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    margin: 0; overflow-x: hidden;
-    cursor: var(--cursor-url), auto !important;
-}
+body { font-family: monospace; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
+#matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
 
-/* MATRIX CANVAS */
-#matrix-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    z-index: -1;
-    opacity: 0.15;
-}
-
-/* GLITCH EFFECT */
-.glitch {
-    position: relative;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-.glitch:hover::before {
-    content: attr(data-text);
-    position: absolute; left: -2px;
-    text-shadow: 2px 0 red;
-    background: var(--bg-color);
-    overflow: hidden;
-    clip: rect(0, 900px, 0, 0);
+/* GLITCH */
+.glitch { position: relative; display: inline-block; }
+.glitch:hover::after {
+    content: attr(data-text); position: absolute; left: 2px; text-shadow: -1px 0 red;
+    top: 0; background: var(--bg-color); overflow: hidden; clip: rect(0,900px,0,0);
     animation: glitch-anim 2s infinite linear alternate-reverse;
 }
+@keyframes glitch-anim { 0%{clip:rect(20px,999px,40px,0)} 100%{clip:rect(40px,999px,60px,0)} }
 
-@keyframes glitch-anim {
-    0% { clip: rect(44px, 9999px, 56px, 0); }
-    20% { clip: rect(12px, 9999px, 30px, 0); }
-    /* ... shortened for brevity, but functional ... */
-    100% { clip: rect(80px, 9999px, 5px, 0); }
-}
-
-/* SYSTEM STATUS BAR */
+/* DASHBOARD */
 .system-dashboard {
-    display: flex; gap: 20px;
-    font-size: 0.7rem;
-    padding: 10px;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 20px;
-    opacity: 0.8;
+    display: flex; justify-content: space-around; font-size: 0.8rem;
+    padding: 10px; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.5);
 }
 
-/* CUSTOM TERMINAL ALERT */
-#custom-alert {
-    display: none;
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: #000;
-    border: 2px solid var(--border-color);
-    padding: 20px;
-    z-index: 10000;
-    box-shadow: 0 0 20px var(--border-color);
-    min-width: 300px;
-}
-.alert-header { border-bottom: 1px solid var(--border-color); margin-bottom: 10px; padding-bottom: 5px; font-weight: bold; }
-
-/* RE-USING YOUR CARD STYLES */
-.container { max-width: 800px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+/* CARDS & INPUTS */
+.container { max-width: 800px; margin: 0 auto; padding: 20px; }
 .custom-header, .post-card, #post-search, #admin-panel {
-    background-color: rgba(13, 2, 17, 0.8);
-    border: 2px solid var(--border-color);
-    padding: 15px; margin-bottom: 20px;
-    box-shadow: 5px 5px 0px var(--shadow-color);
+    background: rgba(10, 0, 20, 0.9); border: 2px solid var(--border-color);
+    padding: 15px; margin-bottom: 20px; box-shadow: 6px 6px 0px var(--shadow-color);
+    text-decoration: none; color: inherit; display: block;
 }
+
+/* CUSTOM ALERT */
+#custom-alert {
+    display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: #000; border: 3px solid var(--border-color); padding: 25px; z-index: 10000;
+    box-shadow: 0 0 30px var(--shadow-color); width: 300px; text-align: center;
+}
+#alert-btn {
+    background: var(--text-color); color: #000; border: none; 
+    padding: 10px; width: 100%; font-family: monospace; cursor: pointer; font-weight: bold;
+}
+
+#admin-panel { display: none; border-style: dashed; }
+.post-title { font-size: 1.2rem; font-weight: bold; }
+.post-date, .post-category { font-size: 0.8rem; opacity: 0.7; }
+
+input { width: 100%; box-sizing: border-box; background: none; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; margin-bottom: 10px; }
