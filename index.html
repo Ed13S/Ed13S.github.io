@@ -8,6 +8,14 @@
     <title>EDDIE13S // SECURE</title>
 </head>
 <body>
+    <div id="firewall-overlay">
+        <div class="firewall-content">
+            <h1>UNAUTHORIZED ACCESS DETECTED</h1>
+            <p>FIREWALL PROTOCOL 0-9 ACTIVATED. YOUR IP HAS BEEN LOGGED.</p>
+            <button onclick="deactivateFirewall()" id="firewall-btn">RE-AUTHENTICATE</button>
+        </div>
+    </div>
+
     <canvas id="matrix-canvas"></canvas>
 
     <div id="custom-alert">
@@ -96,21 +104,52 @@
         }
         setInterval(drawMatrix, 50);
 
-        // --- PORT SCANNER ---
-        const ports = [21, 22, 23, 25, 53, 80, 110, 443, 3306, 8080];
-        let portIdx = 0;
-        setInterval(() => {
-            document.getElementById('port-scanner').innerText = "PORT " + ports[portIdx] + "... OPEN";
-            portIdx = (portIdx + 1) % ports.length;
-        }, 1500);
+        // --- FIREWALL LOGIC ---
+        function activateFirewall() {
+            document.getElementById('firewall-overlay').style.display = 'flex';
+        }
+        function deactivateFirewall() {
+            document.getElementById('firewall-overlay').style.display = 'none';
+            document.getElementById('post-search').value = '';
+            document.querySelectorAll('.post-wrapper').forEach(p => p.style.display = 'block');
+        }
+
+        // --- SEARCH & SECURITY TRIGGER ---
+        document.getElementById('post-search').oninput = (e) => {
+            const val = e.target.value.toLowerCase().trim();
+            
+            // Security trigger: If they type certain "forbidden" words
+            if (val === 'hack' || val === 'root' || val === 'exploit') {
+                activateFirewall();
+                return;
+            }
+
+            const isAdmin = (val === 'admin');
+            document.getElementById('admin-panel').style.display = isAdmin ? 'block' : 'none';
+            
+            document.querySelectorAll('.post-wrapper').forEach(p => {
+                const title = p.querySelector('.post-title').innerText.toLowerCase();
+                p.style.display = (title.includes(val) || val === "" || isAdmin) ? "block" : "none";
+            });
+        };
 
         // --- SYSTEM STATS ---
         fetch('https://api.ipify.org?format=json')
             .then(res => res.json()).then(data => document.getElementById('user-ip').innerText = "IP: " + data.ip)
             .catch(() => document.getElementById('user-ip').innerText = "IP: 127.0.0.1");
-        setInterval(() => { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        
+        setInterval(() => { 
+            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); 
+        }, 1000);
 
-        // --- TERMINAL TYPER ---
+        const ports = [21, 22, 23, 25, 53, 80, 443, 3306];
+        let pIdx = 0;
+        setInterval(() => {
+            document.getElementById('port-scanner').innerText = "PORT " + ports[pIdx] + "... OPEN";
+            pIdx = (pIdx + 1) % ports.length;
+        }, 1500);
+
+        // --- TYPER ---
         const bioText = "I am Eddie, 15 years old. Specializing in cyber security software and secure programming.";
         let charIdx = 0;
         function typeWriter() {
@@ -120,25 +159,7 @@
             }
         }
 
-        // --- SEARCH & ADMIN LOGIC (FIXED) ---
-        document.getElementById('post-search').oninput = (e) => {
-            const val = e.target.value.toLowerCase().trim();
-            const isAdmin = (val === 'admin');
-            
-            document.getElementById('admin-panel').style.display = isAdmin ? 'block' : 'none';
-            
-            document.querySelectorAll('.post-wrapper').forEach(p => {
-                const title = p.querySelector('.post-title').innerText.toLowerCase();
-                // Show if matches search OR if search is empty OR if in admin mode
-                if (title.includes(val) || val === "" || isAdmin) {
-                    p.style.display = "block";
-                } else {
-                    p.style.display = "none";
-                }
-            });
-        };
-
-        // --- ADMIN FUNCTIONS ---
+        // --- ADMIN HELPERS ---
         function addPost() {
             const title = document.getElementById('new-title').value;
             const link = document.getElementById('new-link').value;
@@ -153,9 +174,8 @@
 
         function downloadUpdatedFiles() {
             let docClone = document.documentElement.cloneNode(true);
-            // Before downloading, make sure all posts are visible in the code
             docClone.querySelectorAll('.post-wrapper').forEach(p => p.style.display = "block");
-            docClone.querySelectorAll('.admin-selector, #admin-panel, #custom-alert').forEach(el => el.remove());
+            docClone.querySelectorAll('.admin-selector, #admin-panel, #custom-alert, #firewall-overlay').forEach(el => el.remove());
             docClone.querySelectorAll('.local-post').forEach(el => el.classList.remove('local-post'));
             const element = document.createElement('a');
             element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent("<!DOCTYPE html>\n" + docClone.outerHTML));
@@ -180,12 +200,10 @@
         }
         function closeAlert() { document.getElementById('custom-alert').style.display = 'none'; }
         
-        // --- INITIAL LOAD (FIXED) ---
         window.onload = () => {
             typeWriter();
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
             const container = document.getElementById('posts-container');
-            
             saved.forEach(p => {
                 const html = `
                     <div class="post-wrapper local-post" style="display:block;">
@@ -198,10 +216,6 @@
                     </div>`;
                 container.insertAdjacentHTML('afterbegin', html);
             });
-
-            // Double check visibility
-            document.querySelectorAll('.post-wrapper').forEach(p => p.style.display = "block");
-
             if (!localStorage.getItem('alerted')) {
                 showAlert("SECURITY PROTOCOL ENGAGED.");
                 localStorage.setItem('alerted', 'true');
