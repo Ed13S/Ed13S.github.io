@@ -23,6 +23,15 @@
 
         <input type="text" id="post-search" placeholder="Search posts...">
 
+        <div id="admin-panel" style="display: none; border: 3px dashed blue; padding: 20px; margin-bottom: 30px;">
+            <h3>Admin: Add New Post</h3>
+            <input type="text" id="new-title" placeholder="Post Title">
+            <input type="text" id="new-link" placeholder="Link (URL)">
+            <input type="text" id="new-category" placeholder="Category">
+            <button onclick="addPost()" class="nav-links" style="margin-top:10px; background:blue; color:white;">Add Post to View</button>
+            <p style="font-size: 0.8rem; margin-top: 10px;">*Note: New posts only stay until you refresh. Copy the code to index.html to save forever.</p>
+        </div>
+
         <div id="posts-container">
             <a href="feedback.html" class="post-card">
                 <div class="post-date">January 11, 2023</div>
@@ -36,33 +45,16 @@
                 <div class="post-category">Information, Profiles</div>
             </a>
 
-            <a href="feedback.html" class="post-card">
-                <div class="post-date">January 12, 2026</div>
-                <span class="post-title">Contact Me Form</span>
-                <div class="post-category">Uncategorized</div>
-            </a>
-
             <a href="https://message-encryptor.onrender.com/" class="post-card">
                 <div class="post-date">January 24, 2023</div>
                 <span class="post-title">My favourite project</span>
                 <div class="post-category">Programs</div>
             </a>
-
-            <a href="https://scratch.mit.edu/users/ED13SED13s/" class="post-card">
-                <div class="post-date">January 14, 2023</div>
-                <span class="post-title">Scratch profile</span>
-                <div class="post-category">Information, Profiles</div>
-            </a>
-
-            <a href="https://replit.com/@Eddie13S" class="post-card">
-                <div class="post-date">January 11, 2023</div>
-                <span class="post-title">Replit profile</span>
-                <div class="post-category">Information, Profiles</div>
-            </a>
-        </div>
+            </div>
     </div>
 
     <script>
+        // Age Logic
         function calculateAge(birthDate) {
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
@@ -72,26 +64,53 @@
         }
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
+        // Theme Toggle
         const btn = document.getElementById('theme-toggle');
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
         btn.addEventListener('click', () => {
             let theme = document.documentElement.getAttribute('data-theme');
-            let newTheme = theme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
         });
 
+        // Search + ADMIN PASSWORD TRIGGER
         const searchInput = document.getElementById('post-search');
-        const posts = document.querySelectorAll('.post-card');
+        const adminPanel = document.getElementById('admin-panel');
+        const postsContainer = document.getElementById('posts-container');
+
         searchInput.addEventListener('input', (e) => {
             const value = e.target.value.toLowerCase();
+            
+            // Trigger Admin Panel
+            if (value === 'admin') {
+                adminPanel.style.display = 'block';
+            } else {
+                adminPanel.style.display = 'none';
+            }
+
+            // Normal Search
+            const posts = document.querySelectorAll('.post-card');
             posts.forEach(post => {
                 const title = post.querySelector('.post-title').innerText.toLowerCase();
-                const category = post.querySelector('.post-category').innerText.toLowerCase();
-                post.style.display = (title.includes(value) || category.includes(value)) ? 'block' : 'none';
+                post.style.display = title.includes(value) ? 'block' : 'none';
             });
         });
+
+        // Function to "Post" new stuff visually
+        function addPost() {
+            const title = document.getElementById('new-title').value;
+            const link = document.getElementById('new-link').value;
+            const cat = document.getElementById('new-category').value;
+            const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+            const newCard = `
+                <a href="${link}" class="post-card">
+                    <div class="post-date">${date}</div>
+                    <span class="post-title">${title}</span>
+                    <div class="post-category">${cat}</div>
+                </a>`;
+            
+            postsContainer.insertAdjacentHTML('afterbegin', newCard);
+            alert("Post added to list! To save this permanently, add the HTML to your index.html file in GitHub.");
+        }
     </script>
 </body>
 </html>
