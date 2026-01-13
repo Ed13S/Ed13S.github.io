@@ -18,7 +18,7 @@
 
     <div class="container">
         <div class="system-dashboard">
-            <span>STATUS: <span style="color: #2ecc71;">ENCRYPTED</span></span>
+            <span>STATUS: <span style="color: #2ecc71; font-weight: bold;">ENCRYPTED</span></span>
             <span id="live-clock">00:00:00</span>
             <span id="user-ip">IP: FETCHING...</span>
         </div>
@@ -29,7 +29,7 @@
                 <div class="nav-links">
                     <a href="index.html">About</a>
                     <a href="feedback.html">Feedback</a>
-                    <button id="theme-toggle">Mode</button>
+                    <button id="theme-toggle">MODE</button>
                 </div>
             </div>
         </div>
@@ -41,14 +41,15 @@
         <input type="text" id="post-search" placeholder="Search all posts..." class="reveal active">
 
         <div id="admin-panel">
-            <h3 style="margin-top:0;">_ADMIN_ACCESS</h3>
+            <h3 style="margin-top:0; color: #ff00c1;">_ADMIN_ACCESS_GRANTED</h3>
             <input type="text" id="new-title" placeholder="Post Title">
             <input type="text" id="new-link" placeholder="Link (URL)">
             <input type="text" id="new-category" placeholder="Category">
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                 <button onclick="addPost()">Add Locally</button>
-                <button onclick="downloadUpdatedFiles()" style="background: #2ecc71; color: white;">Export Core (index.html)</button>
-                <button onclick="clearLocalStorage()" style="border-color: #e74c3c; color: #e74c3c;">Reset Local</button>
+                <button onclick="downloadUpdatedFiles()" style="background: #2ecc71; color: #000; font-weight: bold;">Export Core</button>
+                <button onclick="clearLocalStorage()" style="border-color: #f39c12; color: #f39c12;">Reset Local</button>
+                <button onclick="selfDestruct()" style="border-color: #ff4757; color: #ff4757;">SELF_DESTRUCT</button>
             </div>
         </div>
 
@@ -76,7 +77,6 @@
         const drops = Array(Math.floor(columns)).fill(1);
 
         function drawMatrix() {
-            // Get current theme colors from CSS variables
             const styles = getComputedStyle(document.documentElement);
             const bgColor = styles.getPropertyValue('--bg-color').trim();
             const textColor = styles.getPropertyValue('--text-color').trim();
@@ -95,37 +95,46 @@
         }
         setInterval(drawMatrix, 50);
 
-        // 2. IP FETCH
+        // 2. IP FETCH & SYSTEM STATS
         fetch('https://api.ipify.org?format=json')
             .then(res => res.json())
             .then(data => document.getElementById('user-ip').innerText = "IP: " + data.ip)
             .catch(() => document.getElementById('user-ip').innerText = "IP: 127.0.0.1");
 
-        // 3. TYPER & SEARCH
-        const bioText = "I am Eddie, 15 years old. Specializing in cyber security software and secure systems.";
+        setInterval(() => { 
+            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); 
+        }, 1000);
+
+        // 3. TERMINAL TYPER
+        const bioText = "I am Eddie, 15 years old. Specializing in cyber security software and secure programming systems.";
         let charIdx = 0;
         function typeWriter() {
             if (charIdx < bioText.length) {
                 document.getElementById("typing-text").innerHTML += bioText.charAt(charIdx);
-                charIdx++; setTimeout(typeWriter, 50);
+                charIdx++; 
+                setTimeout(typeWriter, 50);
             }
         }
 
+        // 4. SEARCH & ADMIN TOGGLE
         document.getElementById('post-search').oninput = (e) => {
             const val = e.target.value.toLowerCase();
-            document.getElementById('admin-panel').style.display = (val === 'admin') ? 'block' : 'none';
+            const isAdmin = val === 'admin';
+            document.getElementById('admin-panel').style.display = isAdmin ? 'block' : 'none';
+            
             document.querySelectorAll('.post-wrapper').forEach(p => {
                 const title = p.querySelector('.post-title').innerText.toLowerCase();
-                p.style.display = title.includes(val) || val === 'admin' ? 'block' : 'none';
+                p.style.display = title.includes(val) || isAdmin ? 'block' : 'none';
             });
         };
 
-        // 4. ADMIN FUNCTIONS
+        // 5. POST MANAGEMENT
         function addPost() {
             const title = document.getElementById('new-title').value;
             const link = document.getElementById('new-link').value;
             const cat = document.getElementById('new-category').value;
-            if(!title || !link) return showAlert("Title and Link required");
+            if(!title || !link) return showAlert("ERR: Title and Link required.");
+            
             const post = { title, link, cat, date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) };
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
             saved.push(post);
@@ -135,8 +144,7 @@
 
         function downloadUpdatedFiles() {
             let docClone = document.documentElement.cloneNode(true);
-            // Remove selection boxes and Admin panel from the download
-            docClone.querySelectorAll('.admin-selector, #admin-panel').forEach(el => el.remove());
+            docClone.querySelectorAll('.admin-selector, #admin-panel, #custom-alert').forEach(el => el.remove());
             docClone.querySelectorAll('.local-post').forEach(el => el.classList.remove('local-post'));
             
             const element = document.createElement('a');
@@ -146,10 +154,27 @@
         }
 
         function clearLocalStorage() {
-            if(confirm("Wipe local data?")) { localStorage.removeItem('my_custom_posts'); location.reload(); }
+            if(confirm("Confirm: Wipe all local entries?")) { 
+                localStorage.removeItem('my_custom_posts'); 
+                location.reload(); 
+            }
         }
 
-        // 5. THEME & ALERTS
+        // 6. SELF DESTRUCT SEQUENCE
+        function selfDestruct() {
+            if (confirm("CRITICAL WARNING: PROCEED WITH TOTAL SYSTEM WIPE?")) {
+                document.body.classList.add('destruct-sequence');
+                showAlert("SECURITY PROTOCOL ACTIVATED: WIPING LOCAL_STORAGE...");
+                
+                setTimeout(() => {
+                    localStorage.clear();
+                    document.body.innerHTML = "<div style='color:#00ff41; font-family:monospace; text-align:center; margin-top:20%; font-size:2rem;'>[ SYSTEM_OFFLINE ]</div>";
+                    setTimeout(() => { location.reload(); }, 2000);
+                }, 3000);
+            }
+        }
+
+        // 7. THEME & UTILITIES
         function showAlert(msg) {
             document.getElementById('alert-msg').innerText = "> " + msg;
             document.getElementById('custom-alert').style.display = 'block';
@@ -164,8 +189,12 @@
             localStorage.setItem('theme', theme);
         };
 
-        setInterval(() => { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        window.onscroll = () => {
+            document.getElementById("backToTop").style.display = (window.scrollY > 300) ? "block" : "none";
+        };
+        document.getElementById("backToTop").onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
 
+        // INITIAL LOAD
         window.onload = () => {
             typeWriter();
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
@@ -182,7 +211,7 @@
                 document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
             });
             if (!localStorage.getItem('alerted')) {
-                showAlert("AUTHORIZED ACCESS ONLY. SYSTEM MONITORING ACTIVE.");
+                showAlert("AUTHORIZED ACCESS ONLY. ENCRYPTION PROTOCOLS ENGAGED.");
                 localStorage.setItem('alerted', 'true');
             }
         };
