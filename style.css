@@ -3,7 +3,6 @@
     --text-color: blue;
     --border-color: blue;
     --shadow-color: rgba(0, 0, 255, 0.2);
-    /* Reliable Pixel Cursor link */
     --cursor-url: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur');
 }
 
@@ -17,7 +16,6 @@
 [data-admin="true"] {
     --border-color: #2ecc71 !important;
     --text-color: #27ae60 !important;
-    --shadow-color: rgba(46, 204, 113, 0.3) !important;
 }
 
 body {
@@ -32,8 +30,6 @@ body {
 a, button, input, textarea { cursor: var(--cursor-url), pointer !important; }
 
 .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
-
-#about-text { font-size: 1.8rem; font-weight: bold; margin-bottom: 30px; }
 
 .custom-header, .post-card, #post-search, #admin-panel {
     background-color: var(--bg-color);
@@ -50,18 +46,18 @@ a, button, input, textarea { cursor: var(--cursor-url), pointer !important; }
 .home-link { text-decoration: none; color: inherit; font-weight: bold; }
 .nav-links a, button { border: 1px solid var(--border-color); padding: 5px 12px; text-decoration: none; color: inherit; background: none; font-family: monospace;}
 
+/* UPDATED BACK TO TOP */
 #backToTop {
     display: none;
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 99;
     background-color: var(--bg-color);
     border: 3px solid var(--border-color);
     box-shadow: 4px 4px 0px var(--shadow-color);
-    padding: 10px;
+    padding: 10px 15px;
+    font-size: 1.5rem;
     font-weight: bold;
-    font-family: monospace;
     color: var(--text-color);
 }
 
@@ -71,3 +67,4 @@ a, button, input, textarea { cursor: var(--cursor-url), pointer !important; }
 #admin-panel { display: none; border-style: dashed; }
 .post-date { font-size: 0.8rem; opacity: 0.8; }
 .post-title { font-size: 1.3rem; font-weight: bold; display: block; }
+.post-category { font-size: 0.8rem; font-style: italic; }
