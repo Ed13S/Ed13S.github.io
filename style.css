@@ -3,7 +3,6 @@
     --text-color: blue;
     --border-color: blue;
     --shadow-color: rgba(0, 0, 255, 0.2);
-    /* FIXED: Direct raw cursor link */
     --cursor-url: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur');
 }
 
@@ -29,22 +28,13 @@ body {
     cursor: var(--cursor-url), auto !important;
 }
 
-a, button, input, textarea {
-    cursor: var(--cursor-url), pointer !important;
-}
+a, button, input, textarea { cursor: var(--cursor-url), pointer !important; }
 
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px;
-}
+.container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
 
-#about-text {
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin-bottom: 30px;
-}
+#about-text { font-size: 1.8rem; font-weight: bold; margin-bottom: 30px; }
 
+/* SHADED CARD EFFECT */
 .custom-header, .post-card, #post-search, #admin-panel {
     background-color: var(--bg-color);
     border: 3px solid var(--border-color);
@@ -56,17 +46,9 @@ a, button, input, textarea {
     box-shadow: 8px 8px 0px var(--shadow-color);
 }
 
-.inner-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+.inner-header { display: flex; justify-content: space-between; align-items: center; }
 
-.home-link {
-    text-decoration: none;
-    color: inherit;
-    font-weight: bold;
-}
+.home-link { text-decoration: none; color: inherit; font-weight: bold; }
 
 .nav-links a, button {
     color: var(--border-color);
@@ -77,12 +59,19 @@ a, button, input, textarea {
     font-family: monospace;
 }
 
-input, textarea {
-    width: 100%;
-    box-sizing: border-box;
-    font-family: monospace;
+/* SCROLL REVEAL ANIMATION */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease-out;
 }
 
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+input, textarea { width: 100%; box-sizing: border-box; font-family: monospace; }
 #admin-panel { display: none; }
 .post-date { font-size: 0.8rem; opacity: 0.8; }
 .post-title { font-size: 1.3rem; font-weight: bold; display: block; }
