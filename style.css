@@ -3,6 +3,7 @@
     --text-color: blue;
     --border-color: blue;
     --shadow-color: rgba(0, 0, 255, 0.2);
+    /* Reliable Pixel Cursor link */
     --cursor-url: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur');
 }
 
@@ -49,7 +50,6 @@ a, button, input, textarea { cursor: var(--cursor-url), pointer !important; }
 .home-link { text-decoration: none; color: inherit; font-weight: bold; }
 .nav-links a, button { border: 1px solid var(--border-color); padding: 5px 12px; text-decoration: none; color: inherit; background: none; font-family: monospace;}
 
-/* BACK TO TOP BUTTON STYLE */
 #backToTop {
     display: none;
     position: fixed;
@@ -61,9 +61,10 @@ a, button, input, textarea { cursor: var(--cursor-url), pointer !important; }
     box-shadow: 4px 4px 0px var(--shadow-color);
     padding: 10px;
     font-weight: bold;
+    font-family: monospace;
+    color: var(--text-color);
 }
 
-/* ANIMATION */
 .reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
 .reveal.active { opacity: 1 !important; transform: translateY(0) !important; }
 
