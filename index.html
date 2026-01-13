@@ -54,6 +54,8 @@
         </div>
     </div>
 
+    <button id="backToTop" title="Go to top">UP</button>
+
     <script>
         // PERSISTENT THEME
         const currentTheme = localStorage.getItem('theme');
@@ -65,23 +67,27 @@
             localStorage.setItem('theme', theme);
         });
 
-        // SCROLL REVEAL ANIMATION
-        function reveal() {
+        // SCROLL REVEAL & BACK TO TOP LOGIC
+        const btt = document.getElementById("backToTop");
+        function handleScroll() {
+            // Reveal logic
             var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) {
+            reveals.forEach(r => {
                 var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                if (elementTop < windowHeight - 100) {
-                    reveals[i].classList.add("active");
-                }
-            }
+                var elementTop = r.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) { r.classList.add("active"); }
+            });
+            // Back to top logic
+            if (window.scrollY > 300) { btt.style.display = "block"; } 
+            else { btt.style.display = "none"; }
         }
-        window.addEventListener("scroll", reveal);
+        window.addEventListener("scroll", handleScroll);
+        btt.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
 
         // AGE LOGIC
         document.getElementById('exact-age').innerText = (new Date().getFullYear() - 2010) - (new Date() < new Date(new Date().getFullYear(), 2, 6) ? 1 : 0);
 
-        // ADMIN
+        // ADMIN TOOLS
         document.getElementById('post-search').oninput = (e) => {
             const val = e.target.value.toLowerCase();
             document.getElementById('admin-panel').style.display = (val === 'admin') ? 'block' : 'none';
@@ -110,7 +116,7 @@
             });
         }
 
-        window.onload = () => { reveal(); loadSavedPosts(); };
+        window.onload = () => { handleScroll(); loadSavedPosts(); };
     </script>
 </body>
 </html>
