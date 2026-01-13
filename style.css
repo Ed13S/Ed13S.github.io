@@ -1,16 +1,85 @@
-/* Big About Me */
+:root {
+    --bg-color: #e0d7ff; 
+    --text-color: blue;
+    --border-color: blue;
+    --shadow-color: rgba(0, 0, 255, 0.2);
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a0033; 
+    --text-color: #00eaff;
+    --border-color: #00eaff;
+    --shadow-color: rgba(0, 234, 255, 0.2);
+}
+
+body {
+    font-family: monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0; padding: 0;
+    transition: 0.3s;
+}
+
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* BIG ABOUT ME */
 .container p {
-    font-size: 1.8rem; 
+    font-size: 1.8rem;
     font-weight: bold;
+    line-height: 1.4;
     margin-bottom: 30px;
 }
 
-/* Admin Input Styling */
-#admin-panel input {
-    width: 100%;
-    margin: 5px 0;
-    padding: 10px;
-    background: white;
-    border: 2px solid blue;
+.custom-header, .post-card, #post-search {
+    background-color: var(--bg-color);
+    border: 3px solid var(--border-color);
+    padding: 15px;
+    margin-bottom: 30px;
+    text-decoration: none;
+    display: block;
+    color: var(--text-color);
+    box-shadow: 8px 8px 0px var(--shadow-color);
+    transition: 0.2s;
+}
+
+.post-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 12px 12px 0px var(--shadow-color);
+}
+
+.inner-header {
+    border: 2px solid var(--border-color);
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+.nav-links a, #theme-toggle, button {
+    color: var(--border-color);
+    text-decoration: none;
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 5px 12px;
+    cursor: pointer;
     font-family: monospace;
 }
+
+#admin-panel input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: var(--bg-color);
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+    font-family: monospace;
+    box-sizing: border-box;
+}
+
+.post-date, .post-category { font-size: 0.8rem; opacity: 0.8; }
+.post-title { font-size: 1.3rem; font-weight: bold; display: block; }
