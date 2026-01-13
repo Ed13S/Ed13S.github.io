@@ -60,52 +60,34 @@
         if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
 
         document.getElementById('theme-toggle').addEventListener('click', () => {
-            let theme = document.documentElement.getAttribute('data-theme');
-            let newTheme = theme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            let theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
         });
 
         // SCROLL REVEAL ANIMATION
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    reveals[i].classList.add("active");
                 }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            }
+        }
+        window.addEventListener("scroll", reveal);
 
         // AGE LOGIC
         document.getElementById('exact-age').innerText = (new Date().getFullYear() - 2010) - (new Date() < new Date(new Date().getFullYear(), 2, 6) ? 1 : 0);
 
-        // ADMIN & SEARCH
-        const searchInput = document.getElementById('post-search');
-        searchInput.addEventListener('input', (e) => {
-            const value = e.target.value.toLowerCase();
-            document.getElementById('admin-panel').style.display = (value === 'admin') ? 'block' : 'none';
-            if (value === 'admin') document.documentElement.setAttribute('data-admin', 'true');
+        // ADMIN
+        document.getElementById('post-search').oninput = (e) => {
+            const val = e.target.value.toLowerCase();
+            document.getElementById('admin-panel').style.display = (val === 'admin') ? 'block' : 'none';
+            if (val === 'admin') document.documentElement.setAttribute('data-admin', 'true');
             else document.documentElement.removeAttribute('data-admin');
-            
-            document.querySelectorAll('.post-wrapper').forEach(post => {
-                const title = post.querySelector('.post-title').innerText.toLowerCase();
-                post.style.display = title.includes(value) || value === 'admin' ? 'block' : 'none';
-            });
-        });
-
-        function updatePreview() {
-            document.getElementById('pre-title').innerText = document.getElementById('new-title').value || "New Post Title";
-            document.getElementById('pre-cat').innerText = document.getElementById('new-category').value || "Category";
-        }
-
-        function loadSavedPosts() {
-            const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
-            saved.forEach(post => {
-                const html = `<div class="post-wrapper local-post reveal active"><a href="${post.link}" class="post-card"><div class="post-date">${post.date}</div><span class="post-title">${post.title}</span><div class="post-category">${post.cat}</div></a></div>`;
-                document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
-            });
-        }
+        };
 
         function addPost() {
             const post = {
@@ -114,25 +96,21 @@
                 cat: document.getElementById('new-category').value,
                 date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
             };
-            if(!post.title || !post.link) return alert("Fill in title and link!");
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
             saved.push(post);
             localStorage.setItem('my_custom_posts', JSON.stringify(saved));
             location.reload();
         }
 
-        function copyBackupCode() {
-            let code = "";
-            document.querySelectorAll('.local-post').forEach(p => code += p.outerHTML + "\n\n");
-            navigator.clipboard.writeText(code);
-            alert("Code copied!");
+        function loadSavedPosts() {
+            const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
+            saved.forEach(p => {
+                const html = `<div class="post-wrapper local-post reveal active"><a href="${p.link}" class="post-card"><div class="post-date">${p.date}</div><span class="post-title">${p.title}</span><div class="post-category">${p.cat}</div></a></div>`;
+                document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
+            });
         }
 
-        function clearLocalStorage() {
-            if(confirm("Clear local posts?")) { localStorage.removeItem('my_custom_posts'); location.reload(); }
-        }
-
-        window.onload = loadSavedPosts;
+        window.onload = () => { reveal(); loadSavedPosts(); };
     </script>
 </body>
 </html>
