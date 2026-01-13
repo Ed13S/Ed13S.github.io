@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="custom-header reveal active">
+        <div class="custom-header">
             <div class="inner-header">
                 <a href="index.html" class="home-link">EDDIE13S</a>
                 <div class="nav-links">
@@ -19,26 +19,23 @@
                 </div>
             </div>
         </div>
-
-        <div class="custom-header reveal active">
+        <div class="custom-header">
             <h2 style="margin-top: 0;">Send Feedback</h2>
             <form action="https://formspree.io/f/xgooelrv" method="POST">
-                <input type="email" name="email" placeholder="Your Email" required style="margin-bottom: 15px; padding: 10px; border: 2px solid var(--border-color); background: none; color: var(--text-color);">
-                <textarea name="message" placeholder="Your Message" required style="height: 150px; margin-bottom: 15px; padding: 10px; border: 2px solid var(--border-color); background: none; color: var(--text-color);"></textarea>
-                <button type="submit" style="width: 100%; padding: 15px; background: var(--text-color); color: var(--bg-color); font-weight: bold;">Send Message</button>
+                <input type="email" name="email" placeholder="Your Email" required style="margin-bottom: 15px; padding: 10px; border: 2px solid var(--border-color); background: none; color: var(--text-color); width: 100%; box-sizing: border-box;">
+                <textarea name="message" placeholder="Your Message" required style="height: 150px; margin-bottom: 15px; padding: 10px; border: 2px solid var(--border-color); background: none; color: var(--text-color); width: 100%; box-sizing: border-box;"></textarea>
+                <button type="submit" style="width: 100%; padding: 15px; background: var(--text-color); color: var(--bg-color); font-weight: bold; border: none;">Send Message</button>
             </form>
         </div>
     </div>
-
     <script>
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
-        document.getElementById('theme-toggle').addEventListener('click', () => {
-            let theme = document.documentElement.getAttribute('data-theme');
-            let newTheme = theme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
+        document.getElementById('theme-toggle').onclick = () => {
+            let theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        };
     </script>
 </body>
 </html>
