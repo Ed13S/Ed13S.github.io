@@ -41,11 +41,16 @@
         <div id="posts-container">
             <div class="post-wrapper reveal" data-date="January 11, 2023"><a href="https://github.com/Ed13S" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Check out my profile at GitHub @Ed13S</span><div class="post-category">Information, Profiles</div></a></div>
         </div>
+
+        <div class="visitor-box reveal">
+            Total Visits: <span id="visit-count">...</span>
+        </div>
     </div>
 
     <button id="backToTop">⬆</button>
 
     <script>
+        // 1. THEME LOGIC
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
         document.getElementById('theme-toggle').onclick = () => {
@@ -54,6 +59,17 @@
             localStorage.setItem('theme', theme);
         };
 
+        // 2. VISIT COUNTER LOGIC (Uses CountAPI)
+        fetch('https://api.countapi.xyz/hit/eddie13s.github.io/visits')
+            .then(res => res.json())
+            .then(res => {
+                document.getElementById('visit-count').innerHTML = res.value;
+            })
+            .catch(() => {
+                document.getElementById('visit-count').innerHTML = "1"; 
+            });
+
+        // 3. SCROLL LOGIC
         window.onscroll = () => {
             let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -65,8 +81,8 @@
         };
         document.getElementById("backToTop").onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
 
+        // 4. AGE & SEARCH
         document.getElementById('exact-age').innerText = (new Date().getFullYear() - 2010);
-
         document.getElementById('post-search').oninput = (e) => {
             const val = e.target.value.toLowerCase();
             const isAdmin = val === 'admin';
@@ -74,6 +90,14 @@
             if (isAdmin) document.documentElement.setAttribute('data-admin', 'true');
             else document.documentElement.removeAttribute('data-admin');
         };
+
+        // 5. POST LOGIC
+        function checkNewBadge(dateString) {
+            const postDate = new Date(dateString);
+            const now = new Date();
+            const diffInHours = (now - postDate) / (1000 * 60 * 60);
+            return diffInHours < 24 ? '<span class="new-badge">NEW!</span>' : '';
+        }
 
         function addPost() {
             const title = document.getElementById('new-title').value;
@@ -87,14 +111,6 @@
             location.reload();
         }
 
-        // Logic to add "NEW" badge if post is < 24 hours old
-        function checkNewBadge(dateString) {
-            const postDate = new Date(dateString);
-            const now = new Date();
-            const diffInHours = (now - postDate) / (1000 * 60 * 60);
-            return diffInHours < 24 ? '<span class="new-badge">NEW!</span>' : '';
-        }
-
         function downloadUpdatedFiles() {
             const selected = document.querySelectorAll('.post-checkbox:checked');
             let newPostsHtml = "";
@@ -104,22 +120,17 @@
                 wrapper.classList.remove('active', 'local-post');
                 newPostsHtml += wrapper.outerHTML + "\n            ";
             });
-            let currentDoc = document.documentElement.outerHTML;
+            let content = document.documentElement.outerHTML;
+            // Clear local posts from the HTML code before downloading so they don't double up
             let parser = new DOMParser();
-            let doc = parser.parseFromString(currentDoc, 'text/html');
+            let doc = parser.parseFromString(content, 'text/html');
+            doc.querySelectorAll('.local-post').forEach(el => el.remove());
             doc.getElementById('posts-container').insertAdjacentHTML('afterbegin', newPostsHtml);
-            downloadFile("index.html", doc.documentElement.outerHTML);
-        }
-
-        function downloadFile(filename, content) {
+            
             const element = document.createElement('a');
-            element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(content));
-            element.setAttribute('download', filename);
+            element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(doc.documentElement.outerHTML));
+            element.setAttribute('download', "index.html");
             element.click();
-        }
-
-        function clearLocalStorage() {
-            if(confirm("Delete all local posts?")) { localStorage.removeItem('my_custom_posts'); location.reload(); }
         }
 
         window.onload = () => {
@@ -136,14 +147,6 @@
                         </a>
                     </div>`;
                 document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
-            });
-            // Apply badge check to hardcoded posts too
-            document.querySelectorAll('.post-wrapper:not(.local-post)').forEach(p => {
-                const date = p.getAttribute('data-date');
-                if(date) {
-                    const badge = checkNewBadge(date);
-                    if(badge) p.querySelector('.post-title').insertAdjacentHTML('afterbegin', badge + " ");
-                }
             });
         };
     </script>
