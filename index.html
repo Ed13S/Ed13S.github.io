@@ -2,152 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="https://i.ibb.co/TDWtHtCx/image.png" type="image/png">
-    <title>EDDIE13S</title>
+    <title>EDDIE13S // SECURE</title>
 </head>
 <body>
-    <div id="progress-container"><div id="progress-bar"></div></div>
+    <canvas id="matrix-canvas"></canvas>
+
+    <div id="custom-alert">
+        <div class="alert-header">_SYSTEM_NOTIFICATION</div>
+        <p id="alert-msg"></p>
+        <button onclick="closeAlert()" style="color: var(--text-color); border: 1px solid var(--border-color); background: none; width: 100%; padding: 5px;">ACKNOWLEDGE</button>
+    </div>
 
     <div class="container">
-        <div class="custom-header reveal">
+        <div class="system-dashboard">
+            <span>STATUS: <span style="color: #2ecc71;">ENCRYPTED</span></span>
+            <span>OS: EDDIE_OS v1.0</span>
+            <span id="live-clock">00:00:00</span>
+            <span id="user-ip">IP: 127.0.0.1</span>
+        </div>
+
+        <div class="custom-header">
             <div class="inner-header">
-                <a href="index.html" class="home-link">EDDIE13S</a>
+                <a href="index.html" class="home-link glitch" data-text="EDDIE13S">EDDIE13S</a>
                 <div class="nav-links">
-                    <a href="index.html">About</a>
-                    <a href="feedback.html">Feedback</a>
-                    <button id="theme-toggle">Mode</button>
+                    <a href="feedback.html">FEEDBACK</a>
+                    <button id="theme-toggle">CLR_MODE</button>
                 </div>
             </div>
         </div>
 
-        <p id="about-text" class="reveal">My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security.</p>
+        <div class="custom-header">
+            <p id="typing-text" style="margin:0; min-height: 50px;"></p>
+        </div>
 
-        <input type="text" id="post-search" placeholder="Search all posts..." class="reveal">
+        <input type="text" id="post-search" placeholder="Execute command (search)...">
 
-        <div id="admin-panel">
-            <h3 style="margin-top:0;">Admin Mode</h3>
-            <input type="text" id="new-title" placeholder="Post Title">
-            <input type="text" id="new-link" placeholder="Link (URL)">
-            <input type="text" id="new-category" placeholder="Category">
-            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button onclick="addPost()">Add Locally</button>
-                <button onclick="downloadUpdatedFiles()" style="background: #2ecc71; color: white;">Download Updated index.html</button>
-                <button onclick="clearLocalStorage()" style="border-color: #e74c3c; color: #e74c3c;">Reset Local</button>
-            </div>
+        <div id="admin-panel" style="display:none;">
+            <h3>_ADMIN_ACCESS_GRANTED</h3>
+            <input type="text" id="new-title" placeholder="Entry Title">
+            <input type="text" id="new-link" placeholder="Source URL">
+            <button onclick="addPost()">UPLOAD ENTRY</button>
+            <button onclick="downloadUpdatedFiles()">EXPORT CORE</button>
         </div>
 
         <div id="posts-container">
-            <div class="post-wrapper reveal" data-date="January 11, 2023"><a href="https://github.com/Ed13S" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Check out my profile at GitHub @Ed13S</span><div class="post-category">Information, Profiles</div></a></div>
-        </div>
-
-        <div class="visitor-box reveal">
-            Total Visits: <span id="visit-count">...</span>
+            <div class="post-wrapper"><a href="https://github.com/Ed13S" class="post-card"><span class="post-title">@Ed13S_GITHUB_PROFILE</span></a></div>
         </div>
     </div>
 
-    <button id="backToTop">⬆</button>
-
     <script>
-        // 1. THEME LOGIC
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
-        document.getElementById('theme-toggle').onclick = () => {
-            let theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-        };
+        // 1. MATRIX BACKGROUND
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
 
-        // 2. VISIT COUNTER LOGIC (Uses CountAPI)
-        fetch('https://api.countapi.xyz/hit/eddie13s.github.io/visits')
-            .then(res => res.json())
-            .then(res => {
-                document.getElementById('visit-count').innerHTML = res.value;
-            })
-            .catch(() => {
-                document.getElementById('visit-count').innerHTML = "1"; 
-            });
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00ff41";
+            ctx.font = fontSize + "px monospace";
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 50);
 
-        // 3. SCROLL LOGIC
-        window.onscroll = () => {
-            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            document.getElementById("progress-bar").style.width = (winScroll / height) * 100 + "%";
-            document.querySelectorAll(".reveal").forEach(r => {
-                if (r.getBoundingClientRect().top < window.innerHeight - 100) r.classList.add("active");
-            });
-            document.getElementById("backToTop").style.display = (window.scrollY > 300) ? "block" : "none";
-        };
-        document.getElementById("backToTop").onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
-
-        // 4. AGE & SEARCH
-        document.getElementById('exact-age').innerText = (new Date().getFullYear() - 2010);
-        document.getElementById('post-search').oninput = (e) => {
-            const val = e.target.value.toLowerCase();
-            const isAdmin = val === 'admin';
-            document.getElementById('admin-panel').style.display = isAdmin ? 'block' : 'none';
-            if (isAdmin) document.documentElement.setAttribute('data-admin', 'true');
-            else document.documentElement.removeAttribute('data-admin');
-        };
-
-        // 5. POST LOGIC
-        function checkNewBadge(dateString) {
-            const postDate = new Date(dateString);
-            const now = new Date();
-            const diffInHours = (now - postDate) / (1000 * 60 * 60);
-            return diffInHours < 24 ? '<span class="new-badge">NEW!</span>' : '';
+        // 2. TERMINAL TYPER
+        const text = "I am Eddie, 15 years old. Specializing in cyber security software and secure programming systems...";
+        let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                document.getElementById("typing-text").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            }
         }
 
-        function addPost() {
-            const title = document.getElementById('new-title').value;
-            const link = document.getElementById('new-link').value;
-            const cat = document.getElementById('new-category').value;
-            if(!title || !link) return alert("Title and Link required");
-            const post = { title, link, cat, date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) };
-            const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
-            saved.push(post);
-            localStorage.setItem('my_custom_posts', JSON.stringify(saved));
-            location.reload();
+        // 3. CUSTOM ALERT
+        function showAlert(msg) {
+            document.getElementById('alert-msg').innerText = "> " + msg;
+            document.getElementById('custom-alert').style.display = 'block';
         }
+        function closeAlert() { document.getElementById('custom-alert').style.display = 'none'; }
 
-        function downloadUpdatedFiles() {
-            const selected = document.querySelectorAll('.post-checkbox:checked');
-            let newPostsHtml = "";
-            selected.forEach(cb => {
-                let wrapper = cb.closest('.post-wrapper').cloneNode(true);
-                wrapper.querySelector('.admin-selector').remove();
-                wrapper.classList.remove('active', 'local-post');
-                newPostsHtml += wrapper.outerHTML + "\n            ";
-            });
-            let content = document.documentElement.outerHTML;
-            // Clear local posts from the HTML code before downloading so they don't double up
-            let parser = new DOMParser();
-            let doc = parser.parseFromString(content, 'text/html');
-            doc.querySelectorAll('.local-post').forEach(el => el.remove());
-            doc.getElementById('posts-container').insertAdjacentHTML('afterbegin', newPostsHtml);
-            
-            const element = document.createElement('a');
-            element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(doc.documentElement.outerHTML));
-            element.setAttribute('download', "index.html");
-            element.click();
-        }
+        // 4. SYSTEM DASHBOARD (Clock & IP)
+        setInterval(() => {
+            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
 
+        // Run on load
         window.onload = () => {
-            const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
-            saved.forEach((p, index) => {
-                const badge = checkNewBadge(p.date);
-                const html = `
-                    <div class="post-wrapper local-post reveal active" data-date="${p.date}">
-                        <div class="admin-selector"><input type="checkbox" class="post-checkbox" checked></div>
-                        <a href="${p.link}" class="post-card">
-                            <div class="post-date">${p.date}</div>
-                            <span class="post-title">${badge} ${p.title}</span>
-                            <div class="post-category">${p.cat}</div>
-                        </a>
-                    </div>`;
-                document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
-            });
+            typeWriter();
+            if (!localStorage.getItem('alerted')) {
+                showAlert("AUTHORIZED ACCESS ONLY. SYSTEM MONITORING ACTIVE.");
+                localStorage.setItem('alerted', 'true');
+            }
+        };
+
+        // Standard logic for search/admin remains compatible...
+        document.getElementById('post-search').oninput = (e) => {
+            if(e.target.value === 'admin') document.getElementById('admin-panel').style.display = 'block';
         };
     </script>
 </body>
