@@ -31,25 +31,21 @@
             <input type="text" id="new-title" placeholder="Post Title">
             <input type="text" id="new-link" placeholder="Link (URL)">
             <input type="text" id="new-category" placeholder="Category">
-            
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                 <button onclick="addPost()">Add Locally</button>
-                <button onclick="downloadUpdatedFiles()" style="background: #2ecc71; color: white;">Download Updated Files</button>
+                <button onclick="downloadUpdatedFiles()" style="background: #2ecc71; color: white;">Download Updated index.html</button>
                 <button onclick="clearLocalStorage()" style="border-color: #e74c3c; color: #e74c3c;">Reset Local</button>
             </div>
-            <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">Tick posts below to include them in the permanent download.</p>
         </div>
 
         <div id="posts-container">
-            <div class="post-wrapper reveal"><a href="feedback.html" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Feedback Form</span><div class="post-category">Uncategorized</div></a></div>
-            <div class="post-wrapper reveal"><a href="https://github.com/Ed13S" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Check out my profile at GitHub @Ed13S</span><div class="post-category">Information, Profiles</div></a></div>
+            <div class="post-wrapper reveal" data-date="January 11, 2023"><a href="https://github.com/Ed13S" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Check out my profile at GitHub @Ed13S</span><div class="post-category">Information, Profiles</div></a></div>
         </div>
     </div>
 
     <button id="backToTop">⬆</button>
 
     <script>
-        // 1. THEME & WELCOME
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
         document.getElementById('theme-toggle').onclick = () => {
@@ -58,12 +54,10 @@
             localStorage.setItem('theme', theme);
         };
 
-        // 2. SCROLL LOGIC
         window.onscroll = () => {
             let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             document.getElementById("progress-bar").style.width = (winScroll / height) * 100 + "%";
-
             document.querySelectorAll(".reveal").forEach(r => {
                 if (r.getBoundingClientRect().top < window.innerHeight - 100) r.classList.add("active");
             });
@@ -71,10 +65,8 @@
         };
         document.getElementById("backToTop").onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
 
-        // 3. AGE
         document.getElementById('exact-age').innerText = (new Date().getFullYear() - 2010);
 
-        // 4. SEARCH & ADMIN
         document.getElementById('post-search').oninput = (e) => {
             const val = e.target.value.toLowerCase();
             const isAdmin = val === 'admin';
@@ -83,7 +75,6 @@
             else document.documentElement.removeAttribute('data-admin');
         };
 
-        // 5. POST MANAGEMENT
         function addPost() {
             const title = document.getElementById('new-title').value;
             const link = document.getElementById('new-link').value;
@@ -96,35 +87,35 @@
             location.reload();
         }
 
+        // Logic to add "NEW" badge if post is < 24 hours old
+        function checkNewBadge(dateString) {
+            const postDate = new Date(dateString);
+            const now = new Date();
+            const diffInHours = (now - postDate) / (1000 * 60 * 60);
+            return diffInHours < 24 ? '<span class="new-badge">NEW!</span>' : '';
+        }
+
         function downloadUpdatedFiles() {
             const selected = document.querySelectorAll('.post-checkbox:checked');
             let newPostsHtml = "";
             selected.forEach(cb => {
                 let wrapper = cb.closest('.post-wrapper').cloneNode(true);
                 wrapper.querySelector('.admin-selector').remove();
-                wrapper.classList.remove('active');
+                wrapper.classList.remove('active', 'local-post');
                 newPostsHtml += wrapper.outerHTML + "\n            ";
             });
-
-            // This creates a virtual version of your current HTML with the new posts injected
             let currentDoc = document.documentElement.outerHTML;
             let parser = new DOMParser();
             let doc = parser.parseFromString(currentDoc, 'text/html');
             doc.getElementById('posts-container').insertAdjacentHTML('afterbegin', newPostsHtml);
-            
-            // Trigger Downloads
             downloadFile("index.html", doc.documentElement.outerHTML);
-            alert("Updated index.html downloaded! Upload this to your GitHub.");
         }
 
         function downloadFile(filename, content) {
             const element = document.createElement('a');
             element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(content));
             element.setAttribute('download', filename);
-            element.style.display = 'none';
-            document.body.appendChild(element);
             element.click();
-            document.body.removeChild(element);
         }
 
         function clearLocalStorage() {
@@ -134,16 +125,25 @@
         window.onload = () => {
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
             saved.forEach((p, index) => {
+                const badge = checkNewBadge(p.date);
                 const html = `
-                    <div class="post-wrapper local-post reveal active">
+                    <div class="post-wrapper local-post reveal active" data-date="${p.date}">
                         <div class="admin-selector"><input type="checkbox" class="post-checkbox" checked></div>
                         <a href="${p.link}" class="post-card">
                             <div class="post-date">${p.date}</div>
-                            <span class="post-title">${p.title}</span>
+                            <span class="post-title">${badge} ${p.title}</span>
                             <div class="post-category">${p.cat}</div>
                         </a>
                     </div>`;
                 document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
+            });
+            // Apply badge check to hardcoded posts too
+            document.querySelectorAll('.post-wrapper:not(.local-post)').forEach(p => {
+                const date = p.getAttribute('data-date');
+                if(date) {
+                    const badge = checkNewBadge(date);
+                    if(badge) p.querySelector('.post-title').insertAdjacentHTML('afterbegin', badge + " ");
+                }
             });
         };
     </script>
