@@ -1,23 +1,29 @@
+/* 1. THEME VARIABLES */
 :root {
-    --bg-color: #e0d7ff; 
-    --text-color: blue;
-    --border-color: blue;
+    --bg-color: #e0d7ff;       /* Full Lavender Background */
+    --text-color: blue;        /* Primary Text */
+    --border-color: blue;      /* Primary Borders */
     --shadow-color: rgba(0, 0, 255, 0.2); /* The "shaded" second square */
 }
 
+/* 2. DARK MODE OVERRIDES */
 [data-theme="dark"] {
-    --bg-color: #1a0033; 
-    --text-color: #00eaff;
-    --border-color: #00eaff;
+    --bg-color: #1a0033;       /* Deep Purple Background */
+    --text-color: #00eaff;     /* Neon Cyan Text */
+    --border-color: #00eaff;   /* Neon Cyan Borders */
     --shadow-color: rgba(0, 234, 255, 0.2);
 }
 
+/* 3. BASE STYLING */
 body {
     font-family: monospace;
     background-color: var(--bg-color);
     color: var(--text-color);
-    margin: 0; padding: 0;
-    transition: 0.3s;
+    margin: 0;
+    padding: 0;
+    font-size: 1.1rem;
+    transition: background-color 0.3s, color 0.3s;
+    min-height: 100vh;
 }
 
 .container {
@@ -26,8 +32,9 @@ body {
     padding: 0 20px;
 }
 
-/* THE NEUBRUTALISM CARD EFFECT */
-.custom-header, .post-card {
+/* 4. THE SHADED CARD EFFECT (Header & Posts) */
+/* This creates the "second square" slightly right and down */
+.custom-header, .post-card, #post-search {
     background-color: var(--bg-color);
     border: 3px solid var(--border-color);
     padding: 15px;
@@ -35,17 +42,19 @@ body {
     text-decoration: none;
     display: block;
     color: var(--text-color);
-    /* This creates the "second square" offset effect */
-    box-shadow: 8px 8px 0px var(--shadow-color);
-    transition: all 0.2s;
+    box-shadow: 8px 8px 0px var(--shadow-color); /* The shaded shadow */
+    transition: all 0.2s ease-in-out;
 }
 
+/* 5. INTERACTIVE EFFECTS */
 .post-card:hover {
-    /* Moves the card slightly when hovered */
+    /* Moves the card slightly up/left on hover to meet the shadow */
     transform: translate(-2px, -2px);
     box-shadow: 12px 12px 0px var(--shadow-color);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* 6. HEADER SPECIFICS */
 .inner-header {
     border: 2px solid var(--border-color);
     padding: 12px;
@@ -55,24 +64,67 @@ body {
     font-weight: bold;
 }
 
-#post-search {
-    width: 100%;
-    background: var(--bg-color);
-    border: 3px solid var(--border-color);
-    color: var(--text-color);
-    padding: 12px;
-    margin-bottom: 30px;
-    font-family: monospace;
-    box-shadow: 5px 5px 0px var(--shadow-color);
-}
-
-.post-date, .post-category { font-size: 0.8rem; opacity: 0.8; }
-.post-title { font-size: 1.3rem; font-weight: bold; margin: 5px 0; display: block; }
-
-.nav-links a, #theme-toggle {
+.nav-links a, #theme-toggle, .form-btn {
     color: var(--border-color);
     text-decoration: none;
     margin-left: 10px;
+    background: none;
     border: 1px solid var(--border-color);
-    padding: 5px 10px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.nav-links a:hover, #theme-toggle:hover {
+    background-color: var(--border-color);
+    color: var(--bg-color);
+}
+
+/* 7. SEARCH BAR SPECIFICS */
+#post-search {
+    width: 100%;
+    box-sizing: border-box; /* Prevents input from sticking out */
+    outline: none;
+    font-size: 1rem;
+}
+
+/* 8. POST TEXT STYLING */
+.post-date {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    opacity: 0.8;
+}
+
+.post-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin: 5px 0;
+    display: block;
+}
+
+.post-category {
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* 9. CONTACT FORM SPECIFICS (Feedback Page) */
+input[type="email"], textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: none;
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+    padding: 12px;
+    margin: 10px 0;
+    font-family: monospace;
+    box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.form-btn {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    padding: 10px 20px;
 }
