@@ -2,20 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="https://i.ibb.co/TDWtHtCx/image.png" type="image/png">
-    <title>Feedback - EDDIE13S</title>
-</head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="https://i.ibb.co/TDWtHtCx/image.png" type="image/png">
+    <link rel="icon" href="https://i.ibb.co/VWVm0Yv/favicon.png" type="image/png">
     <title>Feedback - EDDIE13S</title>
 </head>
 <body>
     <div class="container">
         <div class="custom-header">
             <div class="inner-header">
-                <span>EDDIE13S</span>
+                <a href="index.html" class="home-link">EDDIE13S</a>
                 <div class="nav-links">
                     <a href="index.html">About</a>
                     <a href="feedback.html">Feedback</a>
@@ -25,26 +21,21 @@
         </div>
 
         <div class="custom-header">
-            <h2 style="margin-top: 0;">Contact Me</h2>
-            <p style="font-size: 1rem; font-weight: normal;">Have a suggestion or want to talk to me? Let me know below.</p>
-            
-            <form action="https://formspree.io/f/xgooelrv" method="POST">
-                <input type="email" name="email" placeholder="Your Email" required style="width: 100%; margin-bottom: 15px; padding: 10px; border: 2px solid var(--border-color); background: none; color: var(--text-color); font-family: monospace;">
-                
-                <textarea name="message" placeholder="Your Message" required style="width: 100%; height: 150px; margin-bottom: 15px; padding: 10px; border: 2px solid var(--border-color); background: none; color: var(--text-color); font-family: monospace;"></textarea>
-                
-                <button type="submit" class="nav-links" style="width: 100%; padding: 15px; background: var(--text-color); color: var(--bg-color); font-weight: bold;">Send Message</button>
+            <h2 style="margin-top: 0;">Send Feedback</h2>
+            <form action="https://formspree.io/f/YOUR_ID_HERE" method="POST">
+                <input type="email" name="email" placeholder="Your Email" required style="margin-bottom: 15px; padding: 10px; border: 2px solid var(--border-color); background: none; color: var(--text-color);">
+                <textarea name="message" placeholder="Your Message" required style="height: 150px; margin-bottom: 15px; padding: 10px; border: 2px solid var(--border-color); background: none; color: var(--text-color);"></textarea>
+                <button type="submit" style="width: 100%; padding: 15px; background: var(--text-color); color: var(--bg-color);">Send Message</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Theme Toggle Logic
-        const btn = document.getElementById('theme-toggle');
+        // PERSISTENT THEME LOGIC
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
-        
-        btn.addEventListener('click', () => {
+
+        document.getElementById('theme-toggle').addEventListener('click', () => {
             let theme = document.documentElement.getAttribute('data-theme');
             let newTheme = theme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
