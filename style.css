@@ -1,20 +1,19 @@
 /* 1. THEME VARIABLES */
 :root {
-    --bg-color: #e0d7ff;       /* Full Lavender Background */
-    --text-color: blue;        /* Primary Text */
-    --border-color: blue;      /* Primary Borders */
-    --shadow-color: rgba(0, 0, 255, 0.2); /* The "shaded" second square */
+    --bg-color: #e0d7ff;       
+    --text-color: blue;        
+    --border-color: blue;      
+    --shadow-color: rgba(0, 0, 255, 0.2); 
 }
 
-/* 2. DARK MODE OVERRIDES */
 [data-theme="dark"] {
-    --bg-color: #1a0033;       /* Deep Purple Background */
-    --text-color: #00eaff;     /* Neon Cyan Text */
-    --border-color: #00eaff;   /* Neon Cyan Borders */
+    --bg-color: #1a0033;       
+    --text-color: #00eaff;     
+    --border-color: #00eaff;   
     --shadow-color: rgba(0, 234, 255, 0.2);
 }
 
-/* 3. BASE STYLING */
+/* 2. BASE STYLING */
 body {
     font-family: monospace;
     background-color: var(--bg-color);
@@ -32,8 +31,15 @@ body {
     padding: 0 20px;
 }
 
-/* 4. THE SHADED CARD EFFECT (Header & Posts) */
-/* This creates the "second square" slightly right and down */
+/* --- THE "ABOUT ME" SIZE INCREASE --- */
+.container p {
+    font-size: 1.6rem;    /* Makes the bio text noticeably bigger */
+    font-weight: bold;   /* Makes it stand out */
+    line-height: 1.4;
+    margin-bottom: 40px; /* Adds space before the search bar */
+}
+
+/* 3. THE SHADED CARD EFFECT */
 .custom-header, .post-card, #post-search {
     background-color: var(--bg-color);
     border: 3px solid var(--border-color);
@@ -42,19 +48,18 @@ body {
     text-decoration: none;
     display: block;
     color: var(--text-color);
-    box-shadow: 8px 8px 0px var(--shadow-color); /* The shaded shadow */
+    box-shadow: 8px 8px 0px var(--shadow-color); 
     transition: all 0.2s ease-in-out;
 }
 
-/* 5. INTERACTIVE EFFECTS */
+/* 4. INTERACTIVE EFFECTS */
 .post-card:hover {
-    /* Moves the card slightly up/left on hover to meet the shadow */
     transform: translate(-2px, -2px);
     box-shadow: 12px 12px 0px var(--shadow-color);
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* 6. HEADER SPECIFICS */
+/* 5. HEADER SPECIFICS */
 .inner-header {
     border: 2px solid var(--border-color);
     padding: 12px;
@@ -64,7 +69,7 @@ body {
     font-weight: bold;
 }
 
-.nav-links a, #theme-toggle, .form-btn {
+.nav-links a, #theme-toggle {
     color: var(--border-color);
     text-decoration: none;
     margin-left: 10px;
@@ -72,59 +77,18 @@ body {
     border: 1px solid var(--border-color);
     padding: 5px 12px;
     cursor: pointer;
-    font-family: monospace;
     font-size: 0.9rem;
-    transition: 0.2s;
 }
 
-.nav-links a:hover, #theme-toggle:hover {
-    background-color: var(--border-color);
-    color: var(--bg-color);
-}
-
-/* 7. SEARCH BAR SPECIFICS */
+/* 6. SEARCH BAR SPECIFICS */
 #post-search {
     width: 100%;
-    box-sizing: border-box; /* Prevents input from sticking out */
-    outline: none;
-    font-size: 1rem;
-}
-
-/* 8. POST TEXT STYLING */
-.post-date {
-    font-size: 0.8rem;
-    margin-bottom: 5px;
-    opacity: 0.8;
-}
-
-.post-title {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin: 5px 0;
-    display: block;
-}
-
-.post-category {
-    font-size: 0.8rem;
-    font-style: italic;
-    opacity: 0.7;
-}
-
-/* 9. CONTACT FORM SPECIFICS (Feedback Page) */
-input[type="email"], textarea {
-    width: 100%;
     box-sizing: border-box;
-    background: none;
-    border: 2px solid var(--border-color);
-    color: var(--text-color);
-    padding: 12px;
-    margin: 10px 0;
-    font-family: monospace;
-    box-shadow: 4px 4px 0px var(--shadow-color);
+    outline: none;
+    font-size: 1.1rem;
 }
 
-.form-btn {
-    margin-top: 10px;
-    font-size: 1.1rem;
-    padding: 10px 20px;
-}
+/* 7. POST TEXT STYLING */
+.post-date { font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8; }
+.post-title { font-size: 1.3rem; font-weight: bold; margin: 5px 0; display: block; }
+.post-category { font-size: 0.8rem; font-style: italic; opacity: 0.7; }
