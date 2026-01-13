@@ -18,12 +18,15 @@
 
     <div class="container">
         <div class="system-dashboard">
-            <span>STATUS: <span style="color: #2ecc71; font-weight: bold;">ENCRYPTED</span></span>
-            <span id="live-clock">00:00:00</span>
-            <span id="user-ip">IP: FETCHING...</span>
+            <div class="dash-item">STATUS: <span style="color: #2ecc71;">ENCRYPTED</span></div>
+            <div class="dash-item" id="live-clock">00:00:00</div>
+            <div class="dash-item" id="user-ip">IP: FETCHING...</div>
+            <div class="dash-item" style="color: #f1c40f; border-left: 1px solid var(--border-color); padding-left: 10px;">
+                SCANNING: <span id="port-scanner">PORT 80</span>
+            </div>
         </div>
 
-        <div class="custom-header reveal active">
+        <div class="custom-header">
             <div class="inner-header">
                 <a href="index.html" class="home-link glitch" data-text="EDDIE13S">EDDIE13S</a>
                 <div class="nav-links">
@@ -34,16 +37,16 @@
             </div>
         </div>
 
-        <div class="custom-header reveal active">
+        <div class="custom-header">
             <p id="typing-text" style="margin:0; min-height: 1.2rem;"></p>
         </div>
 
-        <input type="text" id="post-search" placeholder="Search all posts..." class="reveal active">
+        <input type="text" id="post-search" placeholder="Search all posts...">
 
-        <div id="admin-panel">
+        <div id="admin-panel" style="display:none;">
             <h3 style="margin-top:0; color: #ff00c1;">_ADMIN_ACCESS_GRANTED</h3>
             <input type="text" id="new-title" placeholder="Post Title">
-            <input type="text" id="new-link" placeholder="Link (URL)">
+            <input type="text" id="new-link" placeholder="Source URL">
             <input type="text" id="new-category" placeholder="Category">
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                 <button onclick="addPost()">Add Locally</button>
@@ -54,7 +57,7 @@
         </div>
 
         <div id="posts-container">
-            <div class="post-wrapper reveal active" data-date="January 11, 2023">
+            <div class="post-wrapper" style="display:block;">
                 <a href="https://github.com/Ed13S" class="post-card">
                     <div class="post-date">January 11, 2023</div>
                     <span class="post-title">Check out my profile at GitHub @Ed13S</span>
@@ -67,11 +70,11 @@
     <button id="backToTop">⬆</button>
 
     <script>
-        // 1. DYNAMIC MATRIX BACKGROUND
+        // --- MATRIX ENGINE ---
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()";
+        const letters = "0101SECUREEDDIE13SHACKER";
         const fontSize = 16;
         const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
@@ -80,10 +83,8 @@
             const styles = getComputedStyle(document.documentElement);
             const bgColor = styles.getPropertyValue('--bg-color').trim();
             const textColor = styles.getPropertyValue('--text-color').trim();
-
             ctx.fillStyle = bgColor === "#e0d7ff" ? "rgba(224, 215, 255, 0.15)" : "rgba(13, 2, 17, 0.15)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
             ctx.fillStyle = textColor;
             ctx.font = fontSize + "px monospace";
             for (let i = 0; i < drops.length; i++) {
@@ -95,46 +96,54 @@
         }
         setInterval(drawMatrix, 50);
 
-        // 2. IP FETCH & SYSTEM STATS
+        // --- PORT SCANNER ---
+        const ports = [21, 22, 23, 25, 53, 80, 110, 443, 3306, 8080];
+        let portIdx = 0;
+        setInterval(() => {
+            document.getElementById('port-scanner').innerText = "PORT " + ports[portIdx] + "... OPEN";
+            portIdx = (portIdx + 1) % ports.length;
+        }, 1500);
+
+        // --- SYSTEM STATS ---
         fetch('https://api.ipify.org?format=json')
-            .then(res => res.json())
-            .then(data => document.getElementById('user-ip').innerText = "IP: " + data.ip)
+            .then(res => res.json()).then(data => document.getElementById('user-ip').innerText = "IP: " + data.ip)
             .catch(() => document.getElementById('user-ip').innerText = "IP: 127.0.0.1");
+        setInterval(() => { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
-        setInterval(() => { 
-            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); 
-        }, 1000);
-
-        // 3. TERMINAL TYPER
-        const bioText = "I am Eddie, 15 years old. Specializing in cyber security software and secure programming systems.";
+        // --- TERMINAL TYPER ---
+        const bioText = "I am Eddie, 15 years old. Specializing in cyber security software and secure programming.";
         let charIdx = 0;
         function typeWriter() {
             if (charIdx < bioText.length) {
                 document.getElementById("typing-text").innerHTML += bioText.charAt(charIdx);
-                charIdx++; 
-                setTimeout(typeWriter, 50);
+                charIdx++; setTimeout(typeWriter, 50);
             }
         }
 
-        // 4. SEARCH & ADMIN TOGGLE
+        // --- SEARCH & ADMIN LOGIC (FIXED) ---
         document.getElementById('post-search').oninput = (e) => {
-            const val = e.target.value.toLowerCase();
-            const isAdmin = val === 'admin';
+            const val = e.target.value.toLowerCase().trim();
+            const isAdmin = (val === 'admin');
+            
             document.getElementById('admin-panel').style.display = isAdmin ? 'block' : 'none';
             
             document.querySelectorAll('.post-wrapper').forEach(p => {
                 const title = p.querySelector('.post-title').innerText.toLowerCase();
-                p.style.display = title.includes(val) || isAdmin ? 'block' : 'none';
+                // Show if matches search OR if search is empty OR if in admin mode
+                if (title.includes(val) || val === "" || isAdmin) {
+                    p.style.display = "block";
+                } else {
+                    p.style.display = "none";
+                }
             });
         };
 
-        // 5. POST MANAGEMENT
+        // --- ADMIN FUNCTIONS ---
         function addPost() {
             const title = document.getElementById('new-title').value;
             const link = document.getElementById('new-link').value;
             const cat = document.getElementById('new-category').value;
-            if(!title || !link) return showAlert("ERR: Title and Link required.");
-            
+            if(!title || !link) return showAlert("ERR: Inputs Required");
             const post = { title, link, cat, date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) };
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
             saved.push(post);
@@ -144,63 +153,42 @@
 
         function downloadUpdatedFiles() {
             let docClone = document.documentElement.cloneNode(true);
+            // Before downloading, make sure all posts are visible in the code
+            docClone.querySelectorAll('.post-wrapper').forEach(p => p.style.display = "block");
             docClone.querySelectorAll('.admin-selector, #admin-panel, #custom-alert').forEach(el => el.remove());
             docClone.querySelectorAll('.local-post').forEach(el => el.classList.remove('local-post'));
-            
             const element = document.createElement('a');
             element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent("<!DOCTYPE html>\n" + docClone.outerHTML));
             element.setAttribute('download', "index.html");
             element.click();
         }
 
-        function clearLocalStorage() {
-            if(confirm("Confirm: Wipe all local entries?")) { 
-                localStorage.removeItem('my_custom_posts'); 
-                location.reload(); 
-            }
-        }
-
-        // 6. SELF DESTRUCT SEQUENCE
         function selfDestruct() {
-            if (confirm("CRITICAL WARNING: PROCEED WITH TOTAL SYSTEM WIPE?")) {
+            if (confirm("INITIATE TOTAL SYSTEM WIPE?")) {
                 document.body.classList.add('destruct-sequence');
-                showAlert("SECURITY PROTOCOL ACTIVATED: WIPING LOCAL_STORAGE...");
-                
                 setTimeout(() => {
                     localStorage.clear();
-                    document.body.innerHTML = "<div style='color:#00ff41; font-family:monospace; text-align:center; margin-top:20%; font-size:2rem;'>[ SYSTEM_OFFLINE ]</div>";
+                    document.body.innerHTML = "<div style='color:#00ff41; font-family:monospace; text-align:center; margin-top:20%;'>[ SYSTEM_WIPED ]</div>";
                     setTimeout(() => { location.reload(); }, 2000);
                 }, 3000);
             }
         }
 
-        // 7. THEME & UTILITIES
         function showAlert(msg) {
             document.getElementById('alert-msg').innerText = "> " + msg;
             document.getElementById('custom-alert').style.display = 'block';
         }
         function closeAlert() { document.getElementById('custom-alert').style.display = 'none'; }
         
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
-        document.getElementById('theme-toggle').onclick = () => {
-            let theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-        };
-
-        window.onscroll = () => {
-            document.getElementById("backToTop").style.display = (window.scrollY > 300) ? "block" : "none";
-        };
-        document.getElementById("backToTop").onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
-
-        // INITIAL LOAD
+        // --- INITIAL LOAD (FIXED) ---
         window.onload = () => {
             typeWriter();
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
-            saved.forEach((p, index) => {
+            const container = document.getElementById('posts-container');
+            
+            saved.forEach(p => {
                 const html = `
-                    <div class="post-wrapper local-post reveal active">
+                    <div class="post-wrapper local-post" style="display:block;">
                         <div class="admin-selector"><input type="checkbox" class="post-checkbox" checked></div>
                         <a href="${p.link}" class="post-card">
                             <div class="post-date">${p.date}</div>
@@ -208,12 +196,24 @@
                             <div class="post-category">${p.cat}</div>
                         </a>
                     </div>`;
-                document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
+                container.insertAdjacentHTML('afterbegin', html);
             });
+
+            // Double check visibility
+            document.querySelectorAll('.post-wrapper').forEach(p => p.style.display = "block");
+
             if (!localStorage.getItem('alerted')) {
-                showAlert("AUTHORIZED ACCESS ONLY. ENCRYPTION PROTOCOLS ENGAGED.");
+                showAlert("SECURITY PROTOCOL ENGAGED.");
                 localStorage.setItem('alerted', 'true');
             }
+        };
+
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
+        document.getElementById('theme-toggle').onclick = () => {
+            let theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
         };
     </script>
 </body>
