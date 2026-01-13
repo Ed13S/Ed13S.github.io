@@ -24,7 +24,7 @@ layout: null
 
         <p>My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
 
-        <input type="text" id="post-search" placeholder="Search posts (GitHub, Project, Profile)...">
+        <input type="text" id="post-search" placeholder="Search posts...">
 
         <div id="posts-container">
             <a href="feedback.html" class="post-card">
@@ -66,7 +66,6 @@ layout: null
     </div>
 
     <script>
-        // Age Logic
         function calculateAge(birthDate) {
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
@@ -76,7 +75,6 @@ layout: null
         }
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
-        // Theme Toggle Logic
         const btn = document.getElementById('theme-toggle');
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
@@ -87,7 +85,6 @@ layout: null
             localStorage.setItem('theme', newTheme);
         });
 
-        // Search Logic
         const searchInput = document.getElementById('post-search');
         const posts = document.querySelectorAll('.post-card');
         searchInput.addEventListener('input', (e) => {
