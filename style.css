@@ -1,11 +1,10 @@
-/* 1. THEME VARIABLES */
 :root {
     --bg-color: #e0d7ff; 
     --text-color: blue;
     --border-color: blue;
     --shadow-color: rgba(0, 0, 255, 0.2);
-    /* Pixel Cursor URL */
-    --cursor-url: url('https://ih1.redbubble.net/image.4600717854.9217/st,small,507x507-pad,600x600,f8f8f8.jpg');
+    /* FIXED: Direct raw cursor link */
+    --cursor-url: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur');
 }
 
 [data-theme="dark"] {
@@ -15,27 +14,23 @@
     --shadow-color: rgba(0, 234, 255, 0.2);
 }
 
-/* 2. ADMIN "GOD MODE" COLORS */
 [data-admin="true"] {
     --border-color: #2ecc71 !important;
     --text-color: #27ae60 !important;
     --shadow-color: rgba(46, 204, 113, 0.3) !important;
 }
 
-/* 3. BASE STYLING & CURSOR */
 body {
     font-family: monospace;
     background-color: var(--bg-color);
     color: var(--text-color);
     margin: 0; padding: 0;
-    transition: 0.3s;
-    /* Apply Pixel Cursor to everything */
-    cursor: var(--cursor-url) 16 16, auto;
+    transition: background-color 0.3s;
+    cursor: var(--cursor-url), auto !important;
 }
 
-/* Ensure interactive elements use the custom pointer */
-a, button, input, textarea, select {
-    cursor: var(--cursor-url) 16 16, pointer !important;
+a, button, input, textarea {
+    cursor: var(--cursor-url), pointer !important;
 }
 
 .container {
@@ -44,19 +39,12 @@ a, button, input, textarea, select {
     padding: 0 20px;
 }
 
-/* 4. TEXT STYLING */
 #about-text {
     font-size: 1.8rem;
     font-weight: bold;
-    line-height: 1.4;
     margin-bottom: 30px;
 }
 
-.post-date { font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8; }
-.post-title { font-size: 1.3rem; font-weight: bold; display: block; }
-.post-category { font-size: 0.8rem; font-style: italic; opacity: 0.7; }
-
-/* 5. SHADED BOX EFFECT (Neubrutalism) */
 .custom-header, .post-card, #post-search, #admin-panel {
     background-color: var(--bg-color);
     border: 3px solid var(--border-color);
@@ -66,50 +54,36 @@ a, button, input, textarea, select {
     display: block;
     color: var(--text-color);
     box-shadow: 8px 8px 0px var(--shadow-color);
-    transition: 0.2s;
 }
 
-.post-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 12px 12px 0px var(--shadow-color);
-}
-
-/* 6. NAVIGATION & BUTTONS */
 .inner-header {
-    border: 2px solid var(--border-color);
-    padding: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.nav-links a, button, .submit-btn {
-    color: var(--border-color);
+.home-link {
     text-decoration: none;
-    background: none;
+    color: inherit;
+    font-weight: bold;
+}
+
+.nav-links a, button {
+    color: var(--border-color);
     border: 1px solid var(--border-color);
     padding: 5px 12px;
+    text-decoration: none;
+    background: none;
     font-family: monospace;
-    transition: 0.2s;
 }
 
-button:hover, .nav-links a:hover {
-    background-color: var(--border-color);
-    color: var(--bg-color);
-}
-
-/* 7. FORMS & INPUTS */
-#post-search, input, textarea {
+input, textarea {
     width: 100%;
     box-sizing: border-box;
-    font-size: 1.1rem;
-    outline: none;
     font-family: monospace;
-}
-
-textarea {
-    resize: vertical;
-    min-height: 100px;
 }
 
 #admin-panel { display: none; }
+.post-date { font-size: 0.8rem; opacity: 0.8; }
+.post-title { font-size: 1.3rem; font-weight: bold; display: block; }
+.post-category { font-size: 0.8rem; font-style: italic; }
