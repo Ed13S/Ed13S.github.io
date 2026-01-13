@@ -21,40 +21,30 @@
 
         <p>My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
 
-        <input type="text" id="post-search" placeholder="Search posts...">
+        <input type="text" id="post-search" placeholder="Search posts (Type 'admin' to edit)...">
 
-        <div id="admin-panel" style="display: none; border: 3px dashed blue; padding: 20px; margin-bottom: 30px;">
-            <h3>Admin: Add New Post</h3>
+        <div id="admin-panel" style="display: none; border: 3px dashed var(--border-color); padding: 20px; margin-bottom: 30px; box-shadow: 8px 8px 0px var(--shadow-color);">
+            <h3 style="margin-top:0;">Admin Mode: Add New Post</h3>
             <input type="text" id="new-title" placeholder="Post Title">
             <input type="text" id="new-link" placeholder="Link (URL)">
             <input type="text" id="new-category" placeholder="Category">
-            <button onclick="addPost()" class="nav-links" style="margin-top:10px; background:blue; color:white;">Add Post to View</button>
-            <p style="font-size: 0.8rem; margin-top: 10px;">*Note: New posts only stay until you refresh. Copy the code to index.html to save forever.</p>
+            <button onclick="addPost()" class="nav-links" style="margin: 10px 0; background: var(--text-color); color: var(--bg-color);">Add Post to Device</button>
+            <p style="font-size: 0.8rem;">*Saved to this device only. To show for everyone, add to GitHub.</p>
         </div>
 
         <div id="posts-container">
-            <a href="feedback.html" class="post-card">
-                <div class="post-date">January 11, 2023</div>
-                <span class="post-title">Feedback Form</span>
-                <div class="post-category">Uncategorized</div>
-            </a>
-
-            <a href="https://github.com/Ed13S" class="post-card">
-                <div class="post-date">January 11, 2023</div>
-                <span class="post-title">Check out my profile at GitHub @Ed13S</span>
-                <div class="post-category">Information, Profiles</div>
-            </a>
-
-            <a href="https://message-encryptor.onrender.com/" class="post-card">
-                <div class="post-date">January 24, 2023</div>
-                <span class="post-title">My favourite project</span>
-                <div class="post-category">Programs</div>
-            </a>
+            <div class="post-wrapper">
+                <a href="https://message-encryptor.onrender.com/" class="post-card">
+                    <div class="post-date">January 24, 2023</div>
+                    <span class="post-title">My favourite project</span>
+                    <div class="post-category">Programs</div>
+                </a>
             </div>
+        </div>
     </div>
 
     <script>
-        // Age Logic
+        // --- AGE CALCULATION ---
         function calculateAge(birthDate) {
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
@@ -64,53 +54,54 @@
         }
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
-        // Theme Toggle
-        const btn = document.getElementById('theme-toggle');
-        btn.addEventListener('click', () => {
-            let theme = document.documentElement.getAttribute('data-theme');
-            document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
-        });
-
-        // Search + ADMIN PASSWORD TRIGGER
+        // --- THEME & SEARCH ---
         const searchInput = document.getElementById('post-search');
         const adminPanel = document.getElementById('admin-panel');
-        const postsContainer = document.getElementById('posts-container');
 
         searchInput.addEventListener('input', (e) => {
             const value = e.target.value.toLowerCase();
-            
-            // Trigger Admin Panel
-            if (value === 'admin') {
-                adminPanel.style.display = 'block';
-            } else {
-                adminPanel.style.display = 'none';
-            }
-
-            // Normal Search
-            const posts = document.querySelectorAll('.post-card');
+            adminPanel.style.display = (value === 'admin') ? 'block' : 'none';
+            const posts = document.querySelectorAll('.post-wrapper');
             posts.forEach(post => {
                 const title = post.querySelector('.post-title').innerText.toLowerCase();
-                post.style.display = title.includes(value) ? 'block' : 'none';
+                post.style.display = title.includes(value) || value === 'admin' ? 'block' : 'none';
             });
         });
 
-        // Function to "Post" new stuff visually
-        function addPost() {
-            const title = document.getElementById('new-title').value;
-            const link = document.getElementById('new-link').value;
-            const cat = document.getElementById('new-category').value;
-            const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
-            const newCard = `
-                <a href="${link}" class="post-card">
-                    <div class="post-date">${date}</div>
-                    <span class="post-title">${title}</span>
-                    <div class="post-category">${cat}</div>
-                </a>`;
-            
-            postsContainer.insertAdjacentHTML('afterbegin', newCard);
-            alert("Post added to list! To save this permanently, add the HTML to your index.html file in GitHub.");
+        // --- LOCAL STORAGE LOGIC (AUTO-SAVE) ---
+        function loadSavedPosts() {
+            const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
+            saved.forEach(post => renderPost(post, false));
         }
+
+        function addPost() {
+            const post = {
+                title: document.getElementById('new-title').value,
+                link: document.getElementById('new-link').value,
+                cat: document.getElementById('new-category').value,
+                date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+            };
+            
+            const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
+            saved.push(post);
+            localStorage.setItem('my_custom_posts', JSON.stringify(saved));
+            
+            renderPost(post, true);
+        }
+
+        function renderPost(post, isNew) {
+            const html = `
+                <div class="post-wrapper">
+                    <a href="${post.link}" class="post-card">
+                        <div class="post-date">${post.date}</div>
+                        <span class="post-title">${post.title}</span>
+                        <div class="post-category">${post.cat}</div>
+                    </a>
+                </div>`;
+            document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
+        }
+
+        window.onload = loadSavedPosts;
     </script>
 </body>
 </html>
