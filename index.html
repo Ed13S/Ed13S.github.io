@@ -24,12 +24,13 @@
         <input type="text" id="post-search" placeholder="Search posts (Type 'admin' to edit)...">
 
         <div id="admin-panel" style="display: none; border: 3px dashed var(--border-color); padding: 20px; margin-bottom: 30px; box-shadow: 8px 8px 0px var(--shadow-color);">
-            <h3 style="margin-top:0;">Admin Mode: Add New Post</h3>
+            <h3 style="margin-top:0;">Admin Mode</h3>
             <input type="text" id="new-title" placeholder="Post Title">
             <input type="text" id="new-link" placeholder="Link (URL)">
             <input type="text" id="new-category" placeholder="Category">
-            <button onclick="addPost()" class="nav-links" style="margin: 10px 0; background: var(--text-color); color: var(--bg-color);">Add Post to Device</button>
-            <p style="font-size: 0.8rem;">*Saved to this device only. To show for everyone, add to GitHub.</p>
+            <button onclick="addPost()" class="nav-links" style="margin: 10px 0; background: var(--text-color); color: var(--bg-color);">Add Post</button>
+            <button onclick="clearLocalStorage()" class="nav-links" style="margin: 10px 0; border-color: red; color: red;">Clear Local Posts</button>
+            <p style="font-size: 0.8rem;">*Note: Admin actions stay on this device. To go live for everyone, update GitHub.</p>
         </div>
 
         <div id="posts-container">
@@ -40,11 +41,10 @@
                     <div class="post-category">Programs</div>
                 </a>
             </div>
-        </div>
+            </div>
     </div>
 
     <script>
-        // --- AGE CALCULATION ---
         function calculateAge(birthDate) {
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
@@ -54,7 +54,6 @@
         }
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
-        // --- THEME & SEARCH ---
         const searchInput = document.getElementById('post-search');
         const adminPanel = document.getElementById('admin-panel');
 
@@ -68,10 +67,10 @@
             });
         });
 
-        // --- LOCAL STORAGE LOGIC (AUTO-SAVE) ---
+        // AUTO-SAVE LOGIC
         function loadSavedPosts() {
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
-            saved.forEach(post => renderPost(post, false));
+            saved.forEach((post, index) => renderPost(post, index));
         }
 
         function addPost() {
@@ -81,15 +80,13 @@
                 cat: document.getElementById('new-category').value,
                 date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
             };
-            
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
             saved.push(post);
             localStorage.setItem('my_custom_posts', JSON.stringify(saved));
-            
-            renderPost(post, true);
+            location.reload(); // Refresh to show new post
         }
 
-        function renderPost(post, isNew) {
+        function renderPost(post, index) {
             const html = `
                 <div class="post-wrapper">
                     <a href="${post.link}" class="post-card">
@@ -100,6 +97,19 @@
                 </div>`;
             document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
         }
+
+        function clearLocalStorage() {
+            if(confirm("Clear all local posts?")) {
+                localStorage.removeItem('my_custom_posts');
+                location.reload();
+            }
+        }
+
+        const btn = document.getElementById('theme-toggle');
+        btn.addEventListener('click', () => {
+            let theme = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
+        });
 
         window.onload = loadSavedPosts;
     </script>
