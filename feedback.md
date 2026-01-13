@@ -22,7 +22,7 @@ layout: null
         </div>
 
         <h2>Contact / Feedback</h2>
-        <form action="https://formspree.io/f/xykkyyjj" method="POST">
+        <form action="https://formspree.io/f/xgooelrv" method="POST">
             <input type="email" name="email" placeholder="Your Email" required>
             <textarea name="message" placeholder="Your Message" rows="6" required></textarea>
             <button type="submit" class="form-btn">Send Message</button>
