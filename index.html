@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="custom-header">
+        <div class="custom-header" id="main-header">
             <div class="inner-header">
                 <span>EDDIE13S</span>
                 <div class="nav-links">
@@ -19,21 +19,19 @@
             </div>
         </div>
 
-        <p>My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
+        <p id="about-text">My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
 
         <input type="text" id="post-search" placeholder="Search posts (Search All Posts)...">
 
-        <div id="admin-panel" style="display: none; border: 3px dashed var(--border-color); padding: 20px; margin-bottom: 30px; box-shadow: 8px 8px 0px var(--shadow-color);">
-            <h3 style="margin-top:0;">Admin Tools</h3>
+        <div id="admin-panel">
+            <h3 style="margin-top:0;">Admin Mode Active</h3>
             
             <div id="live-preview-area" style="margin-bottom: 20px;">
-                <p style="font-size: 0.9rem; margin-bottom: 10px;">Live Preview:</p>
-                <div id="preview-render">
-                    <div class="post-card" style="opacity: 0.6;">
-                        <div class="post-date">Current Date</div>
-                        <span class="post-title" id="pre-title">New Post Title</span>
-                        <div class="post-category" id="pre-cat">Category</div>
-                    </div>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">Post Preview:</p>
+                <div class="post-card" style="opacity: 0.7; border-style: dashed;">
+                    <div class="post-date">Current Date</div>
+                    <span class="post-title" id="pre-title">New Post Title</span>
+                    <div class="post-category" id="pre-cat">Category</div>
                 </div>
             </div>
 
@@ -43,20 +41,19 @@
             
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
                 <button onclick="addPost()" style="background: var(--text-color); color: var(--bg-color);">Add Post Locally</button>
-                <button onclick="copyBackupCode()" style="background: #2ecc71; color: white; border-color: #27ae60;">Backup Code for GitHub</button>
-                <button onclick="clearLocalStorage()" style="border-color: red; color: red;">Reset Local Storage</button>
+                <button onclick="copyBackupCode()" style="background: #2ecc71; color: white; border-color: #27ae60;">Backup for GitHub</button>
+                <button onclick="clearLocalStorage()" style="border-color: #e74c3c; color: #e74c3c;">Reset Local</button>
             </div>
         </div>
 
         <div id="posts-container">
-            <div class="post-wrapper">
-                <a href="feedback.html" class="post-card">
-                    <div class="post-date">January 11, 2023</div>
-                    <span class="post-title">Feedback Form</span>
-                    <div class="post-category">Uncategorized</div>
-                </a>
-            </div>
-            </div>
+            <div class="post-wrapper"><a href="feedback.html" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Feedback Form</span><div class="post-category">Uncategorized</div></a></div>
+            <div class="post-wrapper"><a href="https://github.com/Ed13S" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Check out my profile at GitHub @Ed13S</span><div class="post-category">Information, Profiles</div></a></div>
+            <div class="post-wrapper"><a href="feedback.html" class="post-card"><div class="post-date">January 12, 2026</div><span class="post-title">Contact Me Form</span><div class="post-category">Uncategorized</div></a></div>
+            <div class="post-wrapper"><a href="https://message-encryptor.onrender.com/" class="post-card"><div class="post-date">January 24, 2023</div><span class="post-title">My favourite project</span><div class="post-category">Programs</div></a></div>
+            <div class="post-wrapper"><a href="https://scratch.mit.edu/users/ED13SED13s/" class="post-card"><div class="post-date">January 14, 2023</div><span class="post-title">Scratch profile</span><div class="post-category">Information, Profiles</div></a></div>
+            <div class="post-wrapper"><a href="https://replit.com/@Eddie13S" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Replit profile</span><div class="post-category">Information, Profiles</div></a></div>
+        </div>
     </div>
 
     <script>
@@ -69,7 +66,7 @@
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
             const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
             return age;
         }
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
@@ -79,9 +76,14 @@
 
         searchInput.addEventListener('input', (e) => {
             const value = e.target.value.toLowerCase();
-            adminPanel.style.display = (value === 'admin') ? 'block' : 'none';
-            const posts = document.querySelectorAll('.post-wrapper');
-            posts.forEach(post => {
+            if (value === 'admin') {
+                document.documentElement.setAttribute('data-admin', 'true');
+                adminPanel.style.display = 'block';
+            } else {
+                document.documentElement.removeAttribute('data-admin');
+                adminPanel.style.display = 'none';
+            }
+            document.querySelectorAll('.post-wrapper').forEach(post => {
                 const title = post.querySelector('.post-title').innerText.toLowerCase();
                 post.style.display = title.includes(value) || value === 'admin' ? 'block' : 'none';
             });
@@ -99,7 +101,7 @@
                 cat: document.getElementById('new-category').value,
                 date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
             };
-            if(!post.title || !post.link) return alert("Title and Link required!");
+            if(!post.title || !post.link) return alert("Fill in title and link!");
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
             saved.push(post);
             localStorage.setItem('my_custom_posts', JSON.stringify(saved));
@@ -107,32 +109,23 @@
         }
 
         function renderPost(post) {
-            const html = `
-                <div class="post-wrapper local-post">
-                    <a href="${post.link}" class="post-card">
-                        <div class="post-date">${post.date}</div>
-                        <span class="post-title">${post.title}</span>
-                        <div class="post-category">${post.cat}</div>
-                    </a>
-                </div>`;
+            const html = `<div class="post-wrapper local-post"><a href="${post.link}" class="post-card"><div class="post-date">${post.date}</div><span class="post-title">${post.title}</span><div class="post-category">${post.cat}</div></a></div>`;
             document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
         }
 
         function copyBackupCode() {
-            const localPosts = document.querySelectorAll('.local-post');
-            let fullCode = "";
-            localPosts.forEach(p => { fullCode += p.outerHTML + "\n\n"; });
-            if(fullCode === "") return alert("No local posts to backup!");
-            navigator.clipboard.writeText(fullCode);
-            alert("Code copied! Paste this into GitHub.");
+            let code = "";
+            document.querySelectorAll('.local-post').forEach(p => code += p.outerHTML + "\n\n");
+            if(!code) return alert("No local posts!");
+            navigator.clipboard.writeText(code);
+            alert("Code copied! Paste into GitHub.");
         }
 
         function clearLocalStorage() {
-            if(confirm("Clear all?")) { localStorage.removeItem('my_custom_posts'); location.reload(); }
+            if(confirm("Clear local posts?")) { localStorage.removeItem('my_custom_posts'); location.reload(); }
         }
 
-        const themeBtn = document.getElementById('theme-toggle');
-        themeBtn.addEventListener('click', () => {
+        document.getElementById('theme-toggle').addEventListener('click', () => {
             let theme = document.documentElement.getAttribute('data-theme');
             document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'light' : 'dark');
         });
