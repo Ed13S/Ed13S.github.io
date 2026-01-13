@@ -24,7 +24,7 @@ layout: null
 
         <p>My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
 
-        <input type="text" id="post-search" placeholder="Search posts (e.g. GitHub, Project, Profile)...">
+        <input type="text" id="post-search" placeholder="Search posts (GitHub, Project, Profile)...">
 
         <div id="posts-container">
             <a href="feedback.html" class="post-card">
@@ -45,7 +45,7 @@ layout: null
                 <div class="post-category">Uncategorized</div>
             </a>
 
-            <a href="https://4d6ecdd3-c85a-471c-acd1-eee25a7fc9d9-00-189dxo5bne2nc.picard.replit.dev/" class="post-card">
+            <a href="https://message-encryptor.onrender.com/" class="post-card">
                 <div class="post-date">January 24, 2023</div>
                 <span class="post-title">My favourite project</span>
                 <div class="post-category">Programs</div>
@@ -66,7 +66,7 @@ layout: null
     </div>
 
     <script>
-        // Age Calculation
+        // Age Logic
         function calculateAge(birthDate) {
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
@@ -76,7 +76,7 @@ layout: null
         }
         document.getElementById('exact-age').innerText = calculateAge(new Date(2010, 2, 6));
 
-        // Dark Mode Logic
+        // Theme Toggle Logic
         const btn = document.getElementById('theme-toggle');
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) { document.documentElement.setAttribute('data-theme', currentTheme); }
@@ -87,20 +87,15 @@ layout: null
             localStorage.setItem('theme', newTheme);
         });
 
-        // SEARCH LOGIC
+        // Search Logic
         const searchInput = document.getElementById('post-search');
         const posts = document.querySelectorAll('.post-card');
-
         searchInput.addEventListener('input', (e) => {
             const value = e.target.value.toLowerCase();
             posts.forEach(post => {
                 const title = post.querySelector('.post-title').innerText.toLowerCase();
                 const category = post.querySelector('.post-category').innerText.toLowerCase();
-                if (title.includes(value) || category.includes(value)) {
-                    post.style.display = 'block';
-                } else {
-                    post.style.display = 'none';
-                }
+                post.style.display = (title.includes(value) || category.includes(value)) ? 'block' : 'none';
             });
         });
     </script>
