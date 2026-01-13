@@ -66,7 +66,7 @@
     <button id="backToTop">⬆</button>
 
     <script>
-        // 1. MATRIX BACKGROUND
+        // 1. DYNAMIC MATRIX BACKGROUND
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -74,9 +74,17 @@
         const fontSize = 16;
         const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
+
         function drawMatrix() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
+            // Get current theme colors from CSS variables
+            const styles = getComputedStyle(document.documentElement);
+            const bgColor = styles.getPropertyValue('--bg-color').trim();
+            const textColor = styles.getPropertyValue('--text-color').trim();
+
+            ctx.fillStyle = bgColor === "#e0d7ff" ? "rgba(224, 215, 255, 0.15)" : "rgba(13, 2, 17, 0.15)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = textColor;
             ctx.font = fontSize + "px monospace";
             for (let i = 0; i < drops.length; i++) {
                 const text = letters.charAt(Math.floor(Math.random() * letters.length));
@@ -87,13 +95,13 @@
         }
         setInterval(drawMatrix, 50);
 
-        // 2. ACTUAL IP FETCH
+        // 2. IP FETCH
         fetch('https://api.ipify.org?format=json')
             .then(res => res.json())
             .then(data => document.getElementById('user-ip').innerText = "IP: " + data.ip)
-            .catch(() => document.getElementById('user-ip').innerText = "IP: HIDDEN");
+            .catch(() => document.getElementById('user-ip').innerText = "IP: 127.0.0.1");
 
-        // 3. TERMINAL TYPER
+        // 3. TYPER & SEARCH
         const bioText = "I am Eddie, 15 years old. Specializing in cyber security software and secure systems.";
         let charIdx = 0;
         function typeWriter() {
@@ -103,19 +111,16 @@
             }
         }
 
-        // 4. ADMIN & SEARCH
         document.getElementById('post-search').oninput = (e) => {
             const val = e.target.value.toLowerCase();
             document.getElementById('admin-panel').style.display = (val === 'admin') ? 'block' : 'none';
-            if (val === 'admin') document.documentElement.setAttribute('data-admin', 'true');
-            
             document.querySelectorAll('.post-wrapper').forEach(p => {
                 const title = p.querySelector('.post-title').innerText.toLowerCase();
                 p.style.display = title.includes(val) || val === 'admin' ? 'block' : 'none';
             });
         };
 
-        // 5. POST MANAGEMENT (FIXED)
+        // 4. ADMIN FUNCTIONS
         function addPost() {
             const title = document.getElementById('new-title').value;
             const link = document.getElementById('new-link').value;
@@ -129,15 +134,13 @@
         }
 
         function downloadUpdatedFiles() {
-            let content = document.documentElement.outerHTML;
-            let parser = new DOMParser();
-            let doc = parser.parseFromString(content, 'text/html');
-            // Remove selection tools before saving
-            doc.querySelectorAll('.admin-selector').forEach(el => el.remove());
-            doc.querySelectorAll('.local-post').forEach(el => el.classList.remove('local-post'));
+            let docClone = document.documentElement.cloneNode(true);
+            // Remove selection boxes and Admin panel from the download
+            docClone.querySelectorAll('.admin-selector, #admin-panel').forEach(el => el.remove());
+            docClone.querySelectorAll('.local-post').forEach(el => el.classList.remove('local-post'));
             
             const element = document.createElement('a');
-            element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(doc.documentElement.outerHTML));
+            element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent("<!DOCTYPE html>\n" + docClone.outerHTML));
             element.setAttribute('download', "index.html");
             element.click();
         }
@@ -146,7 +149,7 @@
             if(confirm("Wipe local data?")) { localStorage.removeItem('my_custom_posts'); location.reload(); }
         }
 
-        // 6. ALERTS & THEME
+        // 5. THEME & ALERTS
         function showAlert(msg) {
             document.getElementById('alert-msg').innerText = "> " + msg;
             document.getElementById('custom-alert').style.display = 'block';
@@ -160,6 +163,8 @@
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
         };
+
+        setInterval(() => { document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
         window.onload = () => {
             typeWriter();
