@@ -1,94 +1,16 @@
-/* 1. THEME VARIABLES */
-:root {
-    --bg-color: #e0d7ff;       
-    --text-color: blue;        
-    --border-color: blue;      
-    --shadow-color: rgba(0, 0, 255, 0.2); 
-}
-
-[data-theme="dark"] {
-    --bg-color: #1a0033;       
-    --text-color: #00eaff;     
-    --border-color: #00eaff;   
-    --shadow-color: rgba(0, 234, 255, 0.2);
-}
-
-/* 2. BASE STYLING */
-body {
-    font-family: monospace;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-    font-size: 1.1rem;
-    transition: background-color 0.3s, color 0.3s;
-    min-height: 100vh;
-}
-
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px;
-}
-
-/* --- THE "ABOUT ME" SIZE INCREASE --- */
+/* Big About Me */
 .container p {
-    font-size: 1.6rem;    /* Makes the bio text noticeably bigger */
-    font-weight: bold;   /* Makes it stand out */
-    line-height: 1.4;
-    margin-bottom: 40px; /* Adds space before the search bar */
-}
-
-/* 3. THE SHADED CARD EFFECT */
-.custom-header, .post-card, #post-search {
-    background-color: var(--bg-color);
-    border: 3px solid var(--border-color);
-    padding: 15px;
-    margin-bottom: 30px;
-    text-decoration: none;
-    display: block;
-    color: var(--text-color);
-    box-shadow: 8px 8px 0px var(--shadow-color); 
-    transition: all 0.2s ease-in-out;
-}
-
-/* 4. INTERACTIVE EFFECTS */
-.post-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 12px 12px 0px var(--shadow-color);
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* 5. HEADER SPECIFICS */
-.inner-header {
-    border: 2px solid var(--border-color);
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    font-size: 1.8rem; 
     font-weight: bold;
+    margin-bottom: 30px;
 }
 
-.nav-links a, #theme-toggle {
-    color: var(--border-color);
-    text-decoration: none;
-    margin-left: 10px;
-    background: none;
-    border: 1px solid var(--border-color);
-    padding: 5px 12px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-/* 6. SEARCH BAR SPECIFICS */
-#post-search {
+/* Admin Input Styling */
+#admin-panel input {
     width: 100%;
-    box-sizing: border-box;
-    outline: none;
-    font-size: 1.1rem;
+    margin: 5px 0;
+    padding: 10px;
+    background: white;
+    border: 2px solid blue;
+    font-family: monospace;
 }
-
-/* 7. POST TEXT STYLING */
-.post-date { font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8; }
-.post-title { font-size: 1.3rem; font-weight: bold; margin: 5px 0; display: block; }
-.post-category { font-size: 0.8rem; font-style: italic; opacity: 0.7; }
