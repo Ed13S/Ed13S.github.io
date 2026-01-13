@@ -1,178 +1,68 @@
-/* --- THEME VARIABLES --- */
 :root {
     --bg-color: #0d0211; 
     --text-color: #00ff41; 
     --border-color: #00ff41;
     --shadow-color: rgba(0, 255, 65, 0.2);
-    --cursor-url: url('https://cur.cursors-4u.net/games/gam-4/gam372.cur');
 }
 
 [data-theme="light"] {
     --bg-color: #e0d7ff; 
     --text-color: blue;
     --border-color: blue;
-    --shadow-color: rgba(0, 0, 255, 0.2);
+    --shadow-color: rgba(0, 0, 255, 0.1);
 }
 
-/* --- BASE STYLES --- */
-body {
-    font-family: 'Courier New', monospace;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    margin: 0;
-    overflow-x: hidden;
-    transition: background-color 0.3s;
-    cursor: var(--cursor-url), auto !important;
+body { font-family: monospace; background-color: var(--bg-color); color: var(--text-color); margin: 0; overflow-x: hidden; }
+#matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
+
+/* FIREWALL OVERLAY */
+#firewall-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(255,0,0,0.4) 0%, rgba(0,0,0,0.95) 100%);
+    background-image: linear-gradient(rgba(255, 0, 0, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 0, 0, 0.3) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 20000; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; color: #ff4757; animation: grid-scroll 2s linear infinite;
 }
 
-#matrix-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    opacity: 0.15;
+@keyframes grid-scroll {
+    from { background-position: 0 0; }
+    to { background-position: 0 50px; }
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
+.firewall-content h1 { font-size: 3rem; text-shadow: 0 0 20px #ff0000; margin-bottom: 10px; }
+#firewall-btn { background: #ff4757; color: white; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; }
 
-/* --- SYSTEM DASHBOARD --- */
+/* OTHER UI ELEMENTS */
 .system-dashboard {
-    display: flex;
-    justify-content: space-around;
-    font-size: 0.8rem;
-    padding: 10px;
-    border-bottom: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
+    display: flex; gap: 15px; font-size: 0.75rem; padding: 12px;
+    border-bottom: 1px solid var(--border-color); background: rgba(0, 0, 0, 0.4);
+    justify-content: center;
 }
 
-/* --- BOXES & CARDS --- */
+.container { max-width: 800px; margin: 0 auto; padding: 20px; }
 .custom-header, .post-card, #post-search, #admin-panel, #custom-alert {
-    background: rgba(10, 0, 20, 0.85);
-    border: 2px solid var(--border-color);
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 6px 6px 0px var(--shadow-color);
-    text-decoration: none;
-    color: inherit;
+    background: rgba(10, 0, 20, 0.85); border: 2px solid var(--border-color);
+    padding: 15px; margin-bottom: 20px; box-shadow: 6px 6px 0px var(--shadow-color);
+    text-decoration: none; color: inherit; display: block;
 }
 
-.inner-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* --- GLITCH EFFECT --- */
-.glitch {
-    position: relative;
-    display: inline-block;
-    font-weight: bold;
-}
-
+.glitch { position: relative; font-weight: bold; }
 .glitch:hover::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 2px;
-    text-shadow: -2px 0 #ff00c1;
-    top: 0;
-    background: var(--bg-color);
-    overflow: hidden;
-    clip: rect(0, 900px, 0, 0);
+    content: attr(data-text); position: absolute; left: 2px; text-shadow: -1px 0 red;
+    top: 0; background: var(--bg-color); clip: rect(0,900px,0,0);
     animation: glitch-anim 2s infinite linear alternate-reverse;
 }
 
-@keyframes glitch-anim {
-    0% { clip: rect(20px, 999px, 40px, 0); }
-    20% { clip: rect(10px, 999px, 30px, 0); }
-    40% { clip: rect(45px, 999px, 80px, 0); }
-    60% { clip: rect(25px, 999px, 35px, 0); }
-    80% { clip: rect(50px, 999px, 10px, 0); }
-    100% { clip: rect(80px, 999px, 5px, 0); }
-}
+@keyframes glitch-anim { 0% { clip: rect(20px, 999px, 40px, 0); } 100% { clip: rect(40px, 999px, 60px, 0); } }
 
-/* --- ADMIN & INPUTS --- */
-#admin-panel {
-    display: none;
-    border-style: dashed;
-}
+input { width: 100%; box-sizing: border-box; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); color: var(--text-color); padding: 12px; margin-bottom: 10px; font-family: monospace; }
+button { border: 1px solid var(--border-color); padding: 8px 15px; background: none; color: var(--text-color); font-family: monospace; cursor: pointer; }
+button:hover { background: var(--text-color); color: var(--bg-color); }
 
-input {
-    width: 100%;
-    box-sizing: border-box;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--border-color);
-    color: var(--text-color);
-    padding: 12px;
-    margin-bottom: 10px;
-    font-family: 'Courier New', monospace;
-}
+.destruct-sequence { animation: shake 0.1s infinite, flash 0.2s infinite; }
+@keyframes shake { 0% { transform: translate(2px, 2px); } 100% { transform: translate(-2px, -2px); } }
+@keyframes flash { 0% { background-color: #000; } 50% { background-color: #ff0000; } 100% { background-color: #000; } }
 
-button {
-    border: 1px solid var(--border-color);
-    padding: 8px 15px;
-    background: none;
-    color: var(--text-color);
-    font-family: 'Courier New', monospace;
-    cursor: var(--cursor-url), pointer !important;
-}
-
-button:hover {
-    background: var(--text-color);
-    color: var(--bg-color);
-}
-
-/* --- POSTS --- */
-.post-title { font-size: 1.2rem; font-weight: bold; display: block; margin-bottom: 5px; }
-.post-date, .post-category { font-size: 0.8rem; opacity: 0.7; }
-.admin-selector { margin-bottom: 8px; }
-
-/* --- CUSTOM ALERT --- */
-#custom-alert {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10000;
-    width: 320px;
-    text-align: center;
-    background: #000;
-}
-
-#alert-btn {
-    margin-top: 15px;
-    width: 100%;
-    background: var(--text-color);
-    color: #000;
-    font-weight: bold;
-}
-
-/* --- SELF DESTRUCT ANIMATION --- */
-.destruct-sequence {
-    animation: screen-shake 0.1s infinite, flash-red 0.2s infinite;
-}
-
-@keyframes screen-shake {
-    0% { transform: translate(2px, 2px); }
-    50% { transform: translate(-2px, -2px); }
-    100% { transform: translate(1px, -1px); }
-}
-
-@keyframes flash-red {
-    0% { background-color: #000; }
-    50% { background-color: #ff0000; }
-    100% { background-color: #000; }
-}
-
-#backToTop {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    font-size: 1.5rem;
-}
+#custom-alert { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; width: 300px; text-align: center; background: #000; }
+#alert-btn { margin-top: 15px; width: 100%; background: var(--text-color); color: #000; font-weight: bold; }
