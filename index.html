@@ -22,7 +22,7 @@
 
         <p id="about-text" class="reveal">My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
 
-        <input type="text" id="post-search" placeholder="Search (Search All Posts)..." class="reveal">
+        <input type="text" id="post-search" placeholder="Search posts (Type 'admin' for tools)..." class="reveal">
 
         <div id="admin-panel">
             <h3 style="margin-top:0;">Admin Mode Active</h3>
@@ -57,7 +57,7 @@
     <button id="backToTop" title="Go to top">UP</button>
 
     <script>
-        // PERSISTENT THEME
+        // 1. PERSISTENT THEME
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
 
@@ -67,27 +67,31 @@
             localStorage.setItem('theme', theme);
         });
 
-        // SCROLL REVEAL & BACK TO TOP LOGIC
+        // 2. FIRST TIME WELCOME ALERT
+        if (!localStorage.getItem('returning_visitor')) {
+            alert("Welcome to EDDIE13S! Check out my cyber security projects.");
+            localStorage.setItem('returning_visitor', 'true');
+        }
+
+        // 3. SCROLL REVEAL & BACK TO TOP
         const btt = document.getElementById("backToTop");
         function handleScroll() {
-            // Reveal logic
             var reveals = document.querySelectorAll(".reveal");
             reveals.forEach(r => {
                 var windowHeight = window.innerHeight;
                 var elementTop = r.getBoundingClientRect().top;
                 if (elementTop < windowHeight - 100) { r.classList.add("active"); }
             });
-            // Back to top logic
             if (window.scrollY > 300) { btt.style.display = "block"; } 
             else { btt.style.display = "none"; }
         }
         window.addEventListener("scroll", handleScroll);
         btt.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
 
-        // AGE LOGIC
+        // 4. AGE LOGIC
         document.getElementById('exact-age').innerText = (new Date().getFullYear() - 2010) - (new Date() < new Date(new Date().getFullYear(), 2, 6) ? 1 : 0);
 
-        // ADMIN TOOLS
+        // 5. ADMIN & LOCAL POSTS
         document.getElementById('post-search').oninput = (e) => {
             const val = e.target.value.toLowerCase();
             document.getElementById('admin-panel').style.display = (val === 'admin') ? 'block' : 'none';
