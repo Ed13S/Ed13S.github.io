@@ -8,6 +8,8 @@
     <title>EDDIE13S</title>
 </head>
 <body>
+    <div id="progress-container"><div id="progress-bar"></div></div>
+
     <div class="container">
         <div class="custom-header reveal">
             <div class="inner-header">
@@ -20,33 +22,34 @@
             </div>
         </div>
 
-        <p id="about-text" class="reveal">My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security. Feel free to check out my projects below additionally at my other website.</p>
+        <p id="about-text" class="reveal">My name is Eddie, I am <span id="exact-age">15</span>. I like to program software relating to cyber security.</p>
 
         <input type="text" id="post-search" placeholder="Search all posts..." class="reveal">
 
         <div id="admin-panel">
-            <h3 style="margin-top:0;">Admin Mode Active</h3>
+            <h3 style="margin-top:0;">Admin Mode</h3>
             <input type="text" id="new-title" placeholder="Post Title">
             <input type="text" id="new-link" placeholder="Link (URL)">
             <input type="text" id="new-category" placeholder="Category">
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                <button onclick="addPost()">Add Post Locally</button>
-                <button onclick="copyBackupCode()" style="background: #2ecc71; color: white; border-color: #27ae60;">Backup for GitHub</button>
+            
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="addPost()">Add Locally</button>
+                <button onclick="downloadUpdatedFiles()" style="background: #2ecc71; color: white;">Download Updated Files</button>
                 <button onclick="clearLocalStorage()" style="border-color: #e74c3c; color: #e74c3c;">Reset Local</button>
             </div>
+            <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">Tick posts below to include them in the permanent download.</p>
         </div>
 
         <div id="posts-container">
             <div class="post-wrapper reveal"><a href="feedback.html" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Feedback Form</span><div class="post-category">Uncategorized</div></a></div>
             <div class="post-wrapper reveal"><a href="https://github.com/Ed13S" class="post-card"><div class="post-date">January 11, 2023</div><span class="post-title">Check out my profile at GitHub @Ed13S</span><div class="post-category">Information, Profiles</div></a></div>
-            <div class="post-wrapper reveal"><a href="https://message-encryptor.onrender.com/" class="post-card"><div class="post-date">January 24, 2023</div><span class="post-title">My favourite project</span><div class="post-category">Programs</div></a></div>
         </div>
     </div>
 
     <button id="backToTop">⬆</button>
 
     <script>
-        // THEME LOGIC
+        // 1. THEME & WELCOME
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
         document.getElementById('theme-toggle').onclick = () => {
@@ -55,75 +58,91 @@
             localStorage.setItem('theme', theme);
         };
 
-        // WELCOME ALERT
-        if (!localStorage.getItem('returning_visitor')) {
-            alert("Welcome to EDDIE13S!");
-            localStorage.setItem('returning_visitor', 'true');
-        }
-
-        // SCROLL REVEAL & BACK TO TOP
-        const btt = document.getElementById("backToTop");
+        // 2. SCROLL LOGIC
         window.onscroll = () => {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            document.getElementById("progress-bar").style.width = (winScroll / height) * 100 + "%";
+
             document.querySelectorAll(".reveal").forEach(r => {
                 if (r.getBoundingClientRect().top < window.innerHeight - 100) r.classList.add("active");
             });
-            btt.style.display = (window.scrollY > 300) ? "block" : "none";
+            document.getElementById("backToTop").style.display = (window.scrollY > 300) ? "block" : "none";
         };
-        btt.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
+        document.getElementById("backToTop").onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
 
-        // AGE CALCULATION
+        // 3. AGE
         document.getElementById('exact-age').innerText = (new Date().getFullYear() - 2010);
 
-        // SEARCH & ADMIN LOGIC
+        // 4. SEARCH & ADMIN
         document.getElementById('post-search').oninput = (e) => {
             const val = e.target.value.toLowerCase();
-            // Still uses 'admin' secret to show the panel
             const isAdmin = val === 'admin';
             document.getElementById('admin-panel').style.display = isAdmin ? 'block' : 'none';
             if (isAdmin) document.documentElement.setAttribute('data-admin', 'true');
             else document.documentElement.removeAttribute('data-admin');
-
-            document.querySelectorAll('.post-wrapper').forEach(p => {
-                const title = p.querySelector('.post-title').innerText.toLowerCase();
-                p.style.display = title.includes(val) || isAdmin ? 'block' : 'none';
-            });
         };
 
-        // ADMIN FUNCTIONS
+        // 5. POST MANAGEMENT
         function addPost() {
             const title = document.getElementById('new-title').value;
             const link = document.getElementById('new-link').value;
             const cat = document.getElementById('new-category').value;
             if(!title || !link) return alert("Title and Link required");
-
-            const post = { title, link, cat, date: new Date().toLocaleDateString() };
+            const post = { title, link, cat, date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) };
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
             saved.push(post);
             localStorage.setItem('my_custom_posts', JSON.stringify(saved));
             location.reload();
         }
 
-        function copyBackupCode() {
-            let code = "";
-            document.querySelectorAll('.local-post').forEach(p => {
-                code += p.outerHTML + "\n\n";
+        function downloadUpdatedFiles() {
+            const selected = document.querySelectorAll('.post-checkbox:checked');
+            let newPostsHtml = "";
+            selected.forEach(cb => {
+                let wrapper = cb.closest('.post-wrapper').cloneNode(true);
+                wrapper.querySelector('.admin-selector').remove();
+                wrapper.classList.remove('active');
+                newPostsHtml += wrapper.outerHTML + "\n            ";
             });
-            if (!code) return alert("No local posts to backup!");
-            navigator.clipboard.writeText(code).then(() => alert("Code copied to clipboard!"));
+
+            // This creates a virtual version of your current HTML with the new posts injected
+            let currentDoc = document.documentElement.outerHTML;
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(currentDoc, 'text/html');
+            doc.getElementById('posts-container').insertAdjacentHTML('afterbegin', newPostsHtml);
+            
+            // Trigger Downloads
+            downloadFile("index.html", doc.documentElement.outerHTML);
+            alert("Updated index.html downloaded! Upload this to your GitHub.");
+        }
+
+        function downloadFile(filename, content) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(content));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
         }
 
         function clearLocalStorage() {
-            if(confirm("Are you sure you want to delete all local posts?")) {
-                localStorage.removeItem('my_custom_posts');
-                location.reload();
-            }
+            if(confirm("Delete all local posts?")) { localStorage.removeItem('my_custom_posts'); location.reload(); }
         }
-        
-        // LOAD SAVED POSTS
+
         window.onload = () => {
             const saved = JSON.parse(localStorage.getItem('my_custom_posts')) || [];
-            saved.forEach(p => {
-                const html = `<div class="post-wrapper local-post reveal active"><a href="${p.link}" class="post-card"><div class="post-date">${p.date}</div><span class="post-title">${p.title}</span><div class="post-category">${p.cat}</div></a></div>`;
+            saved.forEach((p, index) => {
+                const html = `
+                    <div class="post-wrapper local-post reveal active">
+                        <div class="admin-selector"><input type="checkbox" class="post-checkbox" checked></div>
+                        <a href="${p.link}" class="post-card">
+                            <div class="post-date">${p.date}</div>
+                            <span class="post-title">${p.title}</span>
+                            <div class="post-category">${p.cat}</div>
+                        </a>
+                    </div>`;
                 document.getElementById('posts-container').insertAdjacentHTML('afterbegin', html);
             });
         };
