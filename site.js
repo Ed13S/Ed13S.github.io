@@ -14,8 +14,9 @@
 
     const DEFAULT_CONTENT = {
         siteName: 'EDDIE13S',
-        bio: 'I am Eddie, 24 years old. Specializing in cyber security software and secure programming.',
-        about: '<p>My name is Eddie, I am 24. I like to program software relating to cyber security.</p>',
+        birthday: '2010-04-06',
+        bio: 'I am Eddie, {age} years old. Specializing in cyber security software and secure programming.',
+        about: '<p>My name is Eddie, I am {age}. I like to program software relating to cyber security.</p>',
         projects: '<p>Projects coming soon.</p>',
         feedbackIntro: '',
         contactIntro: '',
@@ -68,7 +69,17 @@
         });
         return t.innerHTML;
     }
-    const render = html => sanitize(html)
+    // {age} in any text is replaced with the age worked out from content.birthday
+    function ageNow() {
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(state.content.birthday || '');
+        if (!m) return '';
+        const now = new Date();
+        let age = now.getFullYear() - +m[1];
+        if (now.getMonth() + 1 < +m[2] || (now.getMonth() + 1 === +m[2] && now.getDate() < +m[3])) age--;
+        return age;
+    }
+    const tokens = t => String(t ?? '').replace(/\{age\}/g, ageNow());
+    const render = html => sanitize(tokens(html))
         .replace(/\[feedback-form\]/g, formHTML('feedback'))
         .replace(/\[contact-form\]/g, formHTML('contact'));
 
@@ -293,7 +304,7 @@
             if (admin) renderAdminPanel();
             filterPosts(admin ? '' : val);
         };
-        typeWriter(state.content.bio);
+        typeWriter(tokens(state.content.bio));
         startStats();
         if (!store.get('alerted')) { showAlert('SECURITY PROTOCOL ENGAGED.'); store.set('alerted', 'true'); }
     }
@@ -481,8 +492,9 @@
 
     const SITE_FIELDS = [
         ['siteName', 'Site name (top bar)', 'input'],
-        ['bio', 'Typing line on the home page', 'input'],
-        ['about', 'About me page (HTML)', 'textarea'],
+        ['birthday', 'Birthday (used for {age})', 'date'],
+        ['bio', 'Typing line on the home page ({age} = your age)', 'input'],
+        ['about', 'About me page (HTML, {age} works here too)', 'textarea'],
         ['projects', 'Projects page (HTML)', 'textarea'],
         ['feedbackIntro', 'Feedback page intro (HTML)', 'textarea'],
         ['contactIntro', 'Contact page intro (HTML)', 'textarea'],
@@ -492,8 +504,8 @@
         try { await adminRefresh(); } catch (e) { toast('Could not load the latest text: ' + e.message, true); return; }
         const c = state.content;
         const m = modal('Edit site text', `
-            ${SITE_FIELDS.map(([k, label, kind]) => `<label>${label}${kind === 'input'
-                ? `<input data-field="${k}" value="${esc(c[k])}">`
+            ${SITE_FIELDS.map(([k, label, kind]) => `<label>${label}${kind !== 'textarea'
+                ? `<input ${kind === 'date' ? 'type="date" ' : ''}data-field="${k}" value="${esc(c[k])}">`
                 : `<textarea data-field="${k}" rows="6">${esc(c[k])}</textarea>`}</label>`).join('')}
             <div class="actions"><button class="primary" id="se-save" type="button">Save text</button><button data-close type="button">Cancel</button></div>
             <p class="form-status" id="se-status"></p>`);
