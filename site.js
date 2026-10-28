@@ -263,7 +263,10 @@
             applyTheme();
         };
         const btt = $('#backToTop');
-        addEventListener('scroll', () => { btt.style.display = scrollY > 300 ? 'block' : 'none'; });
+        if (!renderShell.scrollBound) {
+            renderShell.scrollBound = true;
+            addEventListener('scroll', () => { const b = $('#backToTop'); if (b) b.style.display = scrollY > 300 ? 'block' : 'none'; });
+        }
         btt.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
         $('#alert-btn').onclick = closeAlert;
         $('#firewall-btn').onclick = deactivateFirewall;
@@ -332,8 +335,10 @@
     }
 
     function startStats() {
+        if (startStats.started) return;
+        startStats.started = true;
         fetch('https://api.ipify.org?format=json').then(r => r.json())
-            .then(d => { $('#user-ip').textContent = 'IP: ' + d.ip; })
+            .then(d => { const el = $('#user-ip'); if (el) el.textContent = 'IP: ' + d.ip; })
             .catch(() => { const el = $('#user-ip'); if (el) el.textContent = 'IP: 127.0.0.1'; });
         setInterval(() => { const el = $('#live-clock'); if (el) el.textContent = new Date().toLocaleTimeString(); }, 1000);
         const ports = [21, 22, 23, 25, 53, 80, 443, 3306];
@@ -520,8 +525,8 @@
                 const data = await mutate('content.json', d => Object.assign(d, vals), 'Admin: edit site text');
                 state.content = { ...DEFAULT_CONTENT, ...data };
                 m.close();
+                renderAll();
                 toast(SAVED_MSG);
-                location.reload();
             } catch (e) { status.textContent = e.message; btn.disabled = false; }
         };
     }
@@ -586,16 +591,25 @@
     }
 
     /* ---------- boot ---------- */
-    async function main() {
-        applyTheme();
-        startMatrix();
-        await loadPublic();
+    // (re)draw the whole page from the current state, keeping the admin panel open if it was
+    function renderAll() {
+        const panel = $('#admin-panel');
+        const panelOpen = PAGE === 'home' && panel && !panel.hidden;
         renderShell();
         if (PAGE === 'home') renderHome();
         else if (PAGE === 'post') renderPost();
         else if (PAGES[PAGE]) renderPage();
-        // admins see the freshest data straight from GitHub, not the CDN copy
-        if (isAdmin()) adminRefresh().then(refreshView).catch(() => { /* keep public copy */ });
+        if (panelOpen) { $('#post-search').value = 'admin'; $('#admin-panel').hidden = false; renderAdminPanel(); }
+    }
+
+    async function main() {
+        applyTheme();
+        startMatrix();
+        await loadPublic();
+        // Admins read straight from GitHub so they see their own edits at once,
+        // instead of the public copy, which lags behind by about a minute.
+        if (isAdmin()) { try { await adminRefresh(); } catch { /* fall back to the public copy */ } }
+        renderAll();
     }
     main();
 })();
