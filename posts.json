@@ -1,0 +1,46 @@
+{
+  "posts": [
+    {
+      "slug": "contact-me-form",
+      "title": "Contact Me Form",
+      "date": "2026-01-12T03:35:48Z",
+      "categories": ["Uncategorized"],
+      "body": "[contact-form]"
+    },
+    {
+      "slug": "my-favourite-project",
+      "title": "My favourite project 🎖🌟⭐️",
+      "date": "2023-01-24T01:53:53Z",
+      "categories": ["Programs"],
+      "body": "<p><a href=\"https://replit.com/@Eddie13S/OTP-SECRET-MESSAGES\" target=\"_blank\" rel=\"noopener\">OTP SECRET MESSAGES</a></p>"
+    },
+    {
+      "slug": "scratch-profile",
+      "title": "Scratch profile",
+      "date": "2023-01-14T04:50:51Z",
+      "categories": ["Information", "Profiles"],
+      "body": "<p><a href=\"https://scratch.mit.edu/users/ED13SED13s/\" target=\"_blank\" rel=\"noopener\">Scratch profile</a></p>"
+    },
+    {
+      "slug": "satisfaction-survey",
+      "title": "Feedback form",
+      "date": "2023-01-11T04:46:00Z",
+      "categories": ["Uncategorized"],
+      "body": "[feedback-form]"
+    },
+    {
+      "slug": "replit-profile",
+      "title": "Replit profile",
+      "date": "2023-01-11T03:07:56Z",
+      "categories": ["Information", "Profiles"],
+      "body": "<p><a href=\"https://replit.com/@Eddie13S\" target=\"_blank\" rel=\"noopener\">@Eddie13S</a></p>"
+    },
+    {
+      "slug": "check-out-my-profile-at-github-ed13s",
+      "title": "Check out my profile at GitHub @Ed13S",
+      "date": "2023-01-11T03:06:03Z",
+      "categories": ["Information", "Profiles"],
+      "body": "<p><a href=\"https://github.com/Ed13S\" target=\"_blank\" rel=\"noopener\">@Ed13S</a></p>"
+    }
+  ]
+}
