@@ -62,7 +62,10 @@
             [...el.attributes].forEach(a => {
                 const n = a.name.toLowerCase();
                 const v = a.value.replace(/\s/g, '').toLowerCase();
-                if (n.startsWith('on') || n === 'srcdoc' || n === 'style') el.removeAttribute(a.name);
+                if (n === 'style') {
+                    const al = /text-align\s*:\s*(left|right|center|justify)/i.exec(a.value);
+                    if (al) el.setAttribute('style', 'text-align:' + al[1].toLowerCase()); else el.removeAttribute('style');
+                } else if (n.startsWith('on') || n === 'srcdoc') el.removeAttribute(a.name);
                 else if (['href', 'src', 'action', 'formaction', 'xlink:href'].includes(n) && /^(javascript|data|vbscript):/.test(v)) el.removeAttribute(a.name);
             });
             if (el.tagName === 'A' && el.getAttribute('target') === '_blank') el.setAttribute('rel', 'noopener noreferrer');
@@ -403,30 +406,325 @@
         return { el: m, close };
     }
 
-    function toolbar() {
-        return `<div class="toolbar">
-            <button class="small" type="button" data-tag="<strong>|</strong>"><b>B</b></button>
-            <button class="small" type="button" data-tag="<em>|</em>"><i>I</i></button>
-            <button class="small" type="button" data-tag="<h2>|</h2>">H2</button>
-            <button class="small" type="button" data-tag="<p>|</p>">¶</button>
-            <button class="small" type="button" data-tag="<ul><li>|</li></ul>">List</button>
-            <button class="small" type="button" data-tag="<code>|</code>">Code</button>
-            <button class="small" type="button" data-link="1">Link</button>
-            <button class="small" type="button" data-img="1">Image</button></div>`;
+    /* ---------- Word-style editor: "Simple editor" tab + "Code" tab ---------- */
+    const pageLinks = () => [
+        ['index.html', 'Home'], ['about.html', 'About me'], ['projects.html', 'Projects'],
+        ['feedback.html', 'Feedback'], ['contact.html', 'Contact Me'],
+        ...state.posts.map(p => ['post.html?p=' + encodeURIComponent(p.slug), 'Post: ' + p.title])
+    ];
+
+    // turns what people type ("example.com", "me@mail.com", "about.html") into a working address
+    function normalizeUrl(u) {
+        u = (u || '').trim();
+        if (!u || /\s/.test(u) || /^(javascript|data|vbscript):/i.test(u)) return '';
+        if (/^(https?:\/\/|mailto:|tel:|#|\/|\.\.?\/)/i.test(u)) return u;
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return 'mailto:' + u;
+        if (/^[\w-]+\.html?(\?|#|$)/i.test(u)) return u;
+        return 'https://' + u;
     }
-    function wireToolbar(root, ta) {
-        const put = (before, after, fallback) => {
-            const s = ta.selectionStart, e = ta.selectionEnd;
-            const sel = ta.value.slice(s, e) || fallback || '';
-            ta.setRangeText(before + sel + after, s, e, 'end');
-            ta.focus();
-            ta.dispatchEvent(new Event('input'));
-        };
-        $$('.toolbar button', root).forEach(b => b.onclick = () => {
-            if (b.dataset.tag) { const [a, z] = b.dataset.tag.split('|'); put(a, z); }
-            else if (b.dataset.link) { const u = prompt('Link address (https://…)'); if (u) put(`<a href="${esc(u)}" target="_blank" rel="noopener">`, '</a>', u); }
-            else if (b.dataset.img) { const u = prompt('Image address (https://…)'); if (u) put(`<img src="${esc(u)}" alt="">`, ''); }
+
+    const BLOCK_TAG = /^(P|H[1-6]|UL|OL|LI|BLOCKQUOTE|DIV|TABLE|PRE|HR|FORM|SECTION|ARTICLE|FIGURE)$/;
+    // clean up what the browser's editor produced: paragraphs instead of loose text / <div>s, no empty lines
+    function tidyHTML(html) {
+        const t = document.createElement('template');
+        t.innerHTML = sanitize(html);
+        const walker = document.createTreeWalker(t.content, 128 /* comments */);
+        const comments = [];
+        while (walker.nextNode()) comments.push(walker.currentNode);
+        comments.forEach(c => c.remove());
+        const out = document.createElement('div');
+        let p = null;
+        [...t.content.childNodes].forEach(n => {
+            if (n.nodeType === 1 && BLOCK_TAG.test(n.tagName)) { p = null; out.appendChild(n); return; }
+            if (!p && ((n.nodeType === 3 && !n.textContent.trim()) || (n.nodeType === 1 && n.tagName === 'BR'))) return;
+            if (!p) { p = document.createElement('p'); out.appendChild(p); }
+            p.appendChild(n);
         });
+        [...out.children].forEach(el => {
+            if (el.tagName === 'DIV' && !el.querySelector('p,div,ul,ol,h1,h2,h3,h4,h5,h6,blockquote,table,form')) {
+                const q = document.createElement('p');
+                q.innerHTML = el.innerHTML;
+                if (el.getAttribute('style')) q.setAttribute('style', el.getAttribute('style'));
+                el.replaceWith(q);
+            }
+        });
+        [...out.querySelectorAll('p')].forEach(el => { if (!el.textContent.trim() && !el.querySelector('img,hr')) el.remove(); });
+        return out.innerHTML;
+    }
+    const prettyHTML = html => html.replace(/(<\/(?:p|h[1-6]|ul|ol|li|blockquote|table|tr)>|<hr\s*\/?>)(?!\n)/gi, '$1\n').replace(/\n+$/, '');
+
+    function richEditor(initialHTML, { label = 'Text' } = {}) {
+        const el = document.createElement('div');
+        el.className = 'rte';
+        const cmdBtn = (cmd, title, inner) => `<button type="button" class="small" data-cmd="${cmd}" title="${title}" aria-label="${title}">${inner}</button>`;
+        el.innerHTML = `
+            <div class="rte-tabs" role="tablist">
+                <button type="button" class="rte-tab active" data-mode="visual" role="tab" aria-selected="true">Simple editor</button>
+                <button type="button" class="rte-tab" data-mode="code" role="tab" aria-selected="false">Code</button>
+            </div>
+            <div class="rte-toolbar" role="toolbar" aria-label="Formatting">
+                <span class="rte-group">${cmdBtn('undo', 'Undo', '↶')}${cmdBtn('redo', 'Redo', '↷')}</span>
+                <span class="rte-group"><select class="rte-style" title="Text style" aria-label="Text style">
+                    <option value="p">Normal text</option><option value="h2">Big heading</option><option value="h3">Medium heading</option>
+                    <option value="h4">Small heading</option><option value="blockquote">Quote</option></select></span>
+                <span class="rte-group">${cmdBtn('bold', 'Bold (Ctrl+B)', '<b>B</b>')}${cmdBtn('italic', 'Italic (Ctrl+I)', '<i>I</i>')}${cmdBtn('underline', 'Underline (Ctrl+U)', '<u>U</u>')}</span>
+                <span class="rte-group">${cmdBtn('insertUnorderedList', 'Bulleted list', '• List')}${cmdBtn('insertOrderedList', 'Numbered list', '1. List')}</span>
+                <span class="rte-group">${cmdBtn('justifyLeft', 'Align left', 'Left')}${cmdBtn('justifyCenter', 'Centre', 'Centre')}${cmdBtn('justifyRight', 'Align right', 'Right')}</span>
+                <span class="rte-group">
+                    <button type="button" class="small" data-act="link" title="Add or edit a link (Ctrl+K)">🔗 Link</button>
+                    <button type="button" class="small" data-act="unlink" title="Remove the link">Unlink</button>
+                    <button type="button" class="small" data-act="image" title="Add a picture from a web address">🖼 Picture</button>
+                </span>
+                <span class="rte-group">
+                    <select class="rte-insert" title="Insert" aria-label="Insert">
+                        <option value="">Insert…</option><option value="hr">Divider line</option><option value="age">My age</option>
+                        <option value="contact">Contact form</option><option value="feedback">Feedback form</option></select>
+                    <button type="button" class="small" data-act="clear" title="Remove formatting">Clear</button>
+                </span>
+            </div>
+            <div class="rte-panel" hidden></div>
+            <div class="rte-visual post-body" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="${esc(label)}"></div>
+            <textarea class="rte-code" hidden spellcheck="false" aria-label="${esc(label)} (HTML code)"></textarea>
+            <p class="hint rte-hint"></p>`;
+        const visual = $('.rte-visual', el), code = $('.rte-code', el), panel = $('.rte-panel', el), bar = $('.rte-toolbar', el), hint = $('.rte-hint', el);
+        const HINTS = {
+            visual: 'Select some text, then use the buttons above. Press <b>🔗 Link</b> to make it a clickable link. Forms show as [contact-form] here and appear as the real form on the site.',
+            code: 'You are editing the raw HTML. {age}, [contact-form] and [feedback-form] work here too. Switch back to <b>Simple editor</b> to see it formatted.'
+        };
+        let mode = 'visual', saved = null;
+        const hasExec = () => typeof document.execCommand === 'function';
+        visual.innerHTML = sanitize(initialHTML);
+        hint.innerHTML = HINTS.visual;
+
+        /* remember where the cursor / selection was, because clicking a button or dialog field moves focus */
+        let restoring = false;
+        const saveRange = () => {
+            if (restoring) return;
+            const sel = getSelection();
+            if (sel && sel.rangeCount && visual.contains(sel.anchorNode)) saved = sel.getRangeAt(0).cloneRange();
+        };
+        const restoreRange = () => {
+            // focusing the editor makes the browser jump the cursor to the start, so take a copy first and ignore those events
+            let r = saved ? saved.cloneRange() : null;
+            if (!r) { r = document.createRange(); r.selectNodeContents(visual); r.collapse(false); }
+            restoring = true;
+            try {
+                visual.focus();
+                const sel = getSelection();
+                if (sel) { sel.removeAllRanges(); sel.addRange(r); }
+            } finally { restoring = false; }
+            saved = r;
+        };
+        const closestIn = (node, re) => { let n = node; while (n && n !== visual) { if (n.nodeType === 1 && re.test(n.tagName)) return n; n = n.parentNode; } return null; };
+        const blockOf = () => saved && closestIn(saved.startContainer, /^(P|H[1-6]|BLOCKQUOTE|DIV|LI)$/);
+        const linkOf = () => saved && closestIn(saved.startContainer, /^A$/);
+
+        const refreshState = () => {
+            if (hasExec() && typeof document.queryCommandState === 'function') {
+                ['bold', 'italic', 'underline'].forEach(c => { try { $(`[data-cmd="${c}"]`, el).setAttribute('aria-pressed', String(!!document.queryCommandState(c))); } catch { /* ignore */ } });
+            }
+            const b = blockOf(), tag = b ? b.tagName.toLowerCase() : 'p';
+            $('.rte-style', el).value = ['h2', 'h3', 'h4', 'blockquote'].includes(tag) ? tag : 'p';
+        };
+        // track the selection continuously (mouse, keyboard, double-click, Select All...) so buttons always act on what you selected
+        const onSel = () => {
+            if (!el.isConnected) { document.removeEventListener('selectionchange', onSel); return; }
+            saveRange(); refreshState();
+        };
+        document.addEventListener('selectionchange', onSel);
+        ['keyup', 'mouseup', 'focus', 'blur'].forEach(ev => visual.addEventListener(ev, () => { saveRange(); refreshState(); }));
+        visual.addEventListener('focus', () => {
+            if (hasExec()) { try { document.execCommand('defaultParagraphSeparator', false, 'p'); document.execCommand('styleWithCSS', false, false); } catch { /* ignore */ } }
+        });
+        // buttons must not steal the selection from the text
+        bar.addEventListener('mousedown', e => { if (e.target.closest('button')) e.preventDefault(); });
+        panel.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closePanel(); } });
+
+        const run = (cmd, val) => {
+            saveRange(); restoreRange();
+            let ok = false;
+            if (hasExec()) { try { ok = document.execCommand(cmd, false, val); } catch { ok = false; } }
+            saveRange(); refreshState();
+            return ok;
+        };
+        // put HTML at the cursor (replacing any selection); uses the browser command so Undo still works
+        function insertHTMLAtCaret(html) {
+            restoreRange();
+            if (hasExec()) { let ok = false; try { ok = document.execCommand('insertHTML', false, html); } catch { /* fall through */ } if (ok) { saveRange(); return; } }
+            const t = document.createElement('template');
+            t.innerHTML = html;
+            const last = t.content.lastChild;
+            saved.deleteContents();
+            saved.insertNode(t.content);
+            if (last) { saved.setStartAfter(last); saved.collapse(true); }
+        }
+        function setBlock(tag) {
+            restoreRange();
+            if (hasExec() && run('formatBlock', `<${tag}>`)) return;
+            const b = blockOf();
+            if (!b) return;
+            const n = document.createElement(tag);
+            n.innerHTML = b.innerHTML;
+            b.replaceWith(n);
+            saveRange();
+        }
+        const setTarget = (a, blank) => {
+            if (blank) { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener noreferrer'); }
+            else { a.removeAttribute('target'); a.removeAttribute('rel'); }
+        };
+        function closePanel() { panel.hidden = true; panel.innerHTML = ''; restoreRange(); saveRange(); }
+
+        /* ---- link dialog ---- */
+        function openLinkPanel() {
+            saveRange(); restoreRange(); saveRange();
+            const a = linkOf();
+            const text = a ? a.textContent : (saved ? saved.toString() : '');
+            const href = a ? (a.getAttribute('href') || '') : '';
+            const newTab = a ? a.getAttribute('target') === '_blank' : true;
+            panel.hidden = false;
+            panel.innerHTML = `<strong>${a ? 'Edit link' : 'Add a link'}</strong>
+                <label>Text to show<input class="lk-text" value="${esc(text)}" placeholder="e.g. my Scratch profile"></label>
+                <label>Web address<input class="lk-url" value="${esc(href)}" placeholder="https://example.com" inputmode="url" autocomplete="off"></label>
+                <label>…or link to a page on this site<select class="lk-page"><option value="">Choose a page…</option>
+                    ${pageLinks().map(([u, n]) => `<option value="${esc(u)}">${esc(n)}</option>`).join('')}</select></label>
+                <label class="check"><input type="checkbox" class="lk-new"${newTab ? ' checked' : ''}> Open in a new tab</label>
+                <div class="actions"><button type="button" class="primary" data-lk="apply">${a ? 'Update link' : 'Add link'}</button>
+                    ${a ? '<button type="button" class="danger" data-lk="remove">Remove link</button>' : ''}
+                    <button type="button" data-lk="cancel">Cancel</button></div>
+                <p class="form-status" role="alert"></p>`;
+            $('.lk-page', panel).onchange = e => { if (e.target.value) { $('.lk-url', panel).value = e.target.value; $('.lk-new', panel).checked = false; } };
+            $('[data-lk="cancel"]', panel).onclick = closePanel;
+            const rm = $('[data-lk="remove"]', panel);
+            if (rm) rm.onclick = () => { closePanel(); unlink(); };
+            const apply = () => {
+                const st = $('.form-status', panel);
+                const url = normalizeUrl($('.lk-url', panel).value);
+                if (!url) { st.textContent = 'Type or paste a web address (like https://example.com), or pick a page from the list.'; return; }
+                const label = $('.lk-text', panel).value.trim();
+                const blank = $('.lk-new', panel).checked;
+                restoreRange();
+                const existing = linkOf();
+                if (existing) {
+                    existing.setAttribute('href', url);
+                    setTarget(existing, blank);
+                    if (label && label !== existing.textContent) existing.textContent = label;
+                } else if (saved && !saved.collapsed && (!label || label === saved.toString())) {
+                    wrapSelection(url, blank);                 // keeps bold/italic inside the selected text
+                } else {
+                    const na = document.createElement('a');
+                    na.setAttribute('href', url);
+                    na.textContent = label || url;
+                    setTarget(na, blank);
+                    insertHTMLAtCaret(na.outerHTML);
+                }
+                closePanel();
+            };
+            $('[data-lk="apply"]', panel).onclick = apply;
+            panel.onkeydown = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type === 'text') { e.preventDefault(); apply(); } else if (e.key === 'Escape') { e.stopPropagation(); closePanel(); } };
+            ($('.lk-text', panel).value || a ? $('.lk-url', panel) : $('.lk-text', panel)).focus();
+        }
+        function wrapSelection(url, blank) {
+            const before = $$('a', visual);
+            before.forEach(a => a.setAttribute('data-pre', '1'));
+            let done = false;
+            if (hasExec()) { try { done = document.execCommand('createLink', false, url); } catch { done = false; } }
+            if (!done) {
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                try { saved.surroundContents(a); } catch { a.appendChild(saved.extractContents()); saved.insertNode(a); }
+            }
+            $$('a:not([data-pre])', visual).forEach(a => { a.setAttribute('href', url); setTarget(a, blank); });
+            before.forEach(a => a.removeAttribute('data-pre'));
+        }
+        function unlink() {
+            restoreRange();
+            const a = linkOf();
+            if (a) { const f = document.createDocumentFragment(); while (a.firstChild) f.appendChild(a.firstChild); a.replaceWith(f); }
+            else run('unlink');
+            saveRange();
+        }
+
+        /* ---- picture dialog ---- */
+        function openImagePanel() {
+            saveRange(); restoreRange(); saveRange();
+            panel.hidden = false;
+            panel.innerHTML = `<strong>Add a picture</strong>
+                <label>Picture web address<input class="im-url" placeholder="https://example.com/picture.png" inputmode="url" autocomplete="off"></label>
+                <label>Short description (for people who can't see it)<input class="im-alt" placeholder="e.g. my project screenshot"></label>
+                <div class="actions"><button type="button" class="primary" data-im="apply">Add picture</button><button type="button" data-im="cancel">Cancel</button></div>
+                <p class="form-status" role="alert"></p>`;
+            $('[data-im="cancel"]', panel).onclick = closePanel;
+            const apply = () => {
+                const url = normalizeUrl($('.im-url', panel).value);
+                if (!url || /^(mailto:|tel:)/i.test(url)) { $('.form-status', panel).textContent = 'Paste the address of the picture (it should start with https://).'; return; }
+                const img = document.createElement('img');
+                img.setAttribute('src', url);
+                img.setAttribute('alt', $('.im-alt', panel).value.trim());
+                closePanel();
+                insertHTMLAtCaret(img.outerHTML);
+            };
+            $('[data-im="apply"]', panel).onclick = apply;
+            panel.onkeydown = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); apply(); } else if (e.key === 'Escape') { e.stopPropagation(); closePanel(); } };
+            $('.im-url', panel).focus();
+        }
+
+        /* ---- toolbar wiring ---- */
+        $$('[data-cmd]', el).forEach(b => { b.onclick = () => run(b.dataset.cmd); });
+        $('[data-act="link"]', el).onclick = openLinkPanel;
+        $('[data-act="unlink"]', el).onclick = unlink;
+        $('[data-act="image"]', el).onclick = openImagePanel;
+        $('[data-act="clear"]', el).onclick = () => { run('removeFormat'); setBlock('p'); };
+        $('.rte-style', el).onchange = e => setBlock(e.target.value);
+        $('.rte-insert', el).onchange = e => {
+            const v = e.target.value;
+            e.target.value = '';
+            if (v === 'hr') insertHTMLAtCaret('<hr>');
+            else if (v === 'age') insertHTMLAtCaret('{age}');
+            else if (v === 'contact') insertHTMLAtCaret('<p>[contact-form]</p>');
+            else if (v === 'feedback') insertHTMLAtCaret('<p>[feedback-form]</p>');
+        };
+        visual.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openLinkPanel(); } });
+        // pasting from Word / web pages: keep links and basic formatting, drop the fonts and colours
+        visual.addEventListener('paste', e => {
+            const cd = e.clipboardData;
+            if (!cd) return;
+            const html = cd.getData('text/html'), text = cd.getData('text/plain');
+            e.preventDefault();
+            if (html) {
+                const t = document.createElement('template');
+                t.innerHTML = sanitize(html);
+                t.content.querySelectorAll('*').forEach(n => { ['class', 'id', 'style', 'face', 'size', 'color'].forEach(a => n.removeAttribute(a)); });
+                t.content.querySelectorAll('span,font,meta').forEach(n => n.replaceWith(...n.childNodes));
+                insertHTMLAtCaret(t.innerHTML);
+            } else insertHTMLAtCaret(esc(text).replace(/\n/g, '<br>'));
+        });
+
+        /* ---- the two tabs ---- */
+        const getVisualHTML = () => tidyHTML(visual.innerHTML);
+        function setMode(next) {
+            if (next === mode) return;
+            if (next === 'code') {
+                code.value = prettyHTML(getVisualHTML());
+                panel.hidden = true; panel.innerHTML = '';
+                visual.hidden = true; code.hidden = false;
+            } else {
+                visual.innerHTML = sanitize(code.value);
+                visual.hidden = false; code.hidden = true;
+                saved = null;
+            }
+            mode = next;
+            $$('button,select', bar).forEach(c => { c.disabled = next === 'code'; });
+            $$('.rte-tab', el).forEach(t => { const on = t.dataset.mode === next; t.classList.toggle('active', on); t.setAttribute('aria-selected', String(on)); });
+            hint.innerHTML = HINTS[next];
+        }
+        $$('.rte-tab', el).forEach(t => { t.onclick = () => setMode(t.dataset.mode); });
+
+        return {
+            el,
+            getHTML: () => (mode === 'code' ? code.value : getVisualHTML()),
+            setMode,
+            focus: () => (mode === 'code' ? code : visual).focus()
+        };
     }
 
     async function openPostEditor(post) {
@@ -441,17 +739,12 @@
                 <label>Categories (comma separated)<input id="pe-cats" value="${esc((p.categories || []).join(', '))}"></label>
             </div>
             <label>Address (post.html?p=…)<input id="pe-slug" value="${esc(p.slug)}" ${isNew ? '' : 'readonly'}></label>
-            ${toolbar()}
-            <textarea id="pe-body" rows="12" placeholder="Write your post (HTML allowed)">${esc(p.body)}</textarea>
-            <details><summary>Preview</summary><div id="pe-preview" class="post-body"></div></details>
-            <p class="hint">Tip: type [feedback-form] or [contact-form] to drop in a form.</p>
+            <div class="field"><div class="field-label">Post text</div><div id="pe-rich"></div></div>
             <div class="actions"><button class="primary" id="pe-save" type="button">Save post</button><button data-close type="button">Cancel</button></div>
             <p class="form-status" id="pe-status"></p>`);
-        const root = m.el, ta = $('#pe-body', root);
-        wireToolbar(root, ta);
-        const preview = () => { $('#pe-preview', root).innerHTML = render(ta.value); };
-        ta.addEventListener('input', preview);
-        $('details', root).addEventListener('toggle', preview);
+        const root = m.el;
+        const rich = richEditor(p.body, { label: 'Post text' });
+        $('#pe-rich', root).appendChild(rich.el);
         let slugTouched = !isNew;
         $('#pe-slug', root).addEventListener('input', () => { slugTouched = true; });
         $('#pe-title', root).addEventListener('input', e => { if (!slugTouched) $('#pe-slug', root).value = slugify(e.target.value); });
@@ -467,7 +760,7 @@
             const next = {
                 slug, title, date: `${date}T${timePart}`,
                 categories: $('#pe-cats', root).value.split(',').map(s => s.trim()).filter(Boolean),
-                body: ta.value
+                body: rich.getHTML()
             };
             btn.disabled = true; status.textContent = 'Saving to GitHub…';
             try {
@@ -499,27 +792,36 @@
         ['siteName', 'Site name (top bar)', 'input'],
         ['birthday', 'Birthday (used for {age})', 'date'],
         ['bio', 'Typing line on the home page ({age} = your age)', 'input'],
-        ['about', 'About me page (HTML, {age} works here too)', 'textarea'],
-        ['projects', 'Projects page (HTML)', 'textarea'],
-        ['feedbackIntro', 'Feedback page intro (HTML)', 'textarea'],
-        ['contactIntro', 'Contact page intro (HTML)', 'textarea'],
+        ['about', 'About me page', 'rich'],
+        ['projects', 'Projects page', 'rich'],
+        ['feedbackIntro', 'Feedback page intro', 'rich'],
+        ['contactIntro', 'Contact page intro', 'rich'],
         ['footer', 'Footer text', 'input']
     ];
-    async function openSiteEditor(focus) {
+    // only = a single field name (the "Edit this page" buttons); otherwise every field
+    async function openSiteEditor(only) {
         try { await adminRefresh(); } catch (e) { toast('Could not load the latest text: ' + e.message, true); return; }
         const c = state.content;
-        const m = modal('Edit site text', `
-            ${SITE_FIELDS.map(([k, label, kind]) => `<label>${label}${kind !== 'textarea'
-                ? `<input ${kind === 'date' ? 'type="date" ' : ''}data-field="${k}" value="${esc(c[k])}">`
-                : `<textarea data-field="${k}" rows="6">${esc(c[k])}</textarea>`}</label>`).join('')}
+        const fields = only ? SITE_FIELDS.filter(f => f[0] === only) : SITE_FIELDS;
+        const m = modal(only && fields[0] ? 'Edit: ' + fields[0][1] : 'Edit site text', `
+            ${fields.map(([k, label, kind]) => kind === 'rich'
+                ? `<div class="field"><div class="field-label">${label}</div><div data-rich="${k}"></div></div>`
+                : `<label>${label}<input ${kind === 'date' ? 'type="date" ' : ''}data-field="${k}" value="${esc(c[k])}"></label>`).join('')}
             <div class="actions"><button class="primary" id="se-save" type="button">Save text</button><button data-close type="button">Cancel</button></div>
             <p class="form-status" id="se-status"></p>`);
-        const first = $(`[data-field="${focus || 'siteName'}"]`, m.el);
-        if (first) first.focus();
+        const editors = {};
+        fields.filter(f => f[2] === 'rich').forEach(([k, label]) => {
+            editors[k] = richEditor(c[k], { label });
+            editors[k].el.dataset.field = k;
+            $(`[data-rich="${k}"]`, m.el).appendChild(editors[k].el);
+        });
+        const first = Object.values(editors)[0];
+        if (first) first.focus(); else { const i = $('input[data-field]', m.el); if (i) i.focus(); }
         $('#se-save', m.el).onclick = async () => {
             const status = $('#se-status', m.el), btn = $('#se-save', m.el);
             const vals = {};
-            $$('[data-field]', m.el).forEach(el => { vals[el.dataset.field] = el.value; });
+            $$('input[data-field]', m.el).forEach(el => { vals[el.dataset.field] = el.value; });
+            Object.keys(editors).forEach(k => { vals[k] = editors[k].getHTML(); });
             btn.disabled = true; status.textContent = 'Saving to GitHub…';
             try {
                 const data = await mutate('content.json', d => Object.assign(d, vals), 'Admin: edit site text');
