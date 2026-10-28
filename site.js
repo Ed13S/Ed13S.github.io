@@ -453,6 +453,111 @@
     }
     const prettyHTML = html => html.replace(/(<\/(?:p|h[1-6]|ul|ol|li|blockquote|table|tr)>|<hr\s*\/?>)(?!\n)/gi, '$1\n').replace(/\n+$/, '');
 
+    /* ---------- AI writing (OpenRouter free models) ----------
+     * The key is pasted by the admin and kept only in this browser (never in the repo),
+     * and the browser talks to OpenRouter directly. */
+    const OR = { url: 'https://openrouter.ai/api/v1', keyK: 'ed_or_key', modelK: 'ed_or_model', auto: 'openrouter/free' };
+    const AI_SYSTEM = 'You are a writing assistant for Eddie\'s personal website about cyber security and programming. '
+        + 'Reply with ONLY the finished text as simple HTML using <p>, <h2>, <h3>, <strong>, <em>, <ul>, <ol>, <li>, <a href> and <blockquote>. '
+        + 'No markdown, no code fences, no introduction and no explanation. '
+        + 'Keep placeholders such as {age}, [contact-form] and [feedback-form] exactly as written. '
+        + 'Write in the first person as Eddie unless told otherwise. Do not invent links, facts or personal details; if unsure, keep it general.';
+    const AI_MODES = {
+        write:    { label: 'Write something new at the cursor', ph: 'e.g. a short intro about my cyber security projects', needsText: true },
+        rewrite:  { label: 'Rewrite the selected text', ph: 'Optional: how? e.g. friendlier, more professional', needsSel: true },
+        fix:      { label: 'Fix spelling and grammar in the selected text', needsSel: true },
+        shorter:  { label: 'Make the selected text shorter', needsSel: true },
+        longer:   { label: 'Make the selected text longer', needsSel: true },
+        continue: { label: 'Continue writing from the cursor', ph: 'Optional: where should it go?', needsBefore: true }
+    };
+    function aiPrompt(mode, instr, label, sel, before) {
+        const i = (instr || '').trim();
+        const page = `The text is for the "${label}" part of the website.`;
+        switch (mode) {
+            case 'write': return `${page}\nWrite this: ${i}`;
+            case 'rewrite': return `${page}\nRewrite the text below${i ? ' (' + i + ')' : ' so it reads better'}, keeping its meaning and any links. Reply with just the rewritten text.\n\nTEXT:\n${sel}`;
+            case 'fix': return `${page}\nFix the spelling and grammar of the text below. Do not change the meaning, wording style or links. Reply with just the corrected text.\n\nTEXT:\n${sel}`;
+            case 'shorter': return `${page}\nMake the text below shorter while keeping the key points and links. Reply with just the shortened text.\n\nTEXT:\n${sel}`;
+            case 'longer': return `${page}\nMake the text below a bit longer by adding relevant detail, without inventing facts. Keep its links. Reply with just the longer text.\n\nTEXT:\n${sel}`;
+            default: return `${page}\nContinue the text naturally with one or two more paragraphs${i ? '. Direction: ' + i : ''}. Reply with ONLY the new text, not the text that already exists.\n\nTEXT SO FAR:\n${before}`;
+        }
+    }
+    // tiny markdown -> HTML, for models that ignore "reply in HTML"
+    function markdownLite(t) {
+        const inline = x => esc(x)
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/(^|[\s(])\*(?!\s)(.+?)\*(?=[\s).,!?;:]|$)/g, '$1<em>$2</em>')
+            .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2">$1</a>');
+        const out = [];
+        let list = null, para = [];
+        const flushP = () => { if (para.length) { out.push('<p>' + para.map(inline).join('<br>') + '</p>'); para = []; } };
+        const flushL = () => { if (list) { out.push(`<${list.t}>` + list.items.map(x => '<li>' + inline(x) + '</li>').join('') + `</${list.t}>`); list = null; } };
+        for (const raw of String(t).split('\n')) {
+            const line = raw.trim();
+            let m;
+            if (!line) { flushP(); flushL(); continue; }
+            if ((m = /^(#{1,6})\s+(.*)$/.exec(line))) { flushP(); flushL(); const h = m[1].length <= 2 ? 2 : 3; out.push(`<h${h}>${inline(m[2])}</h${h}>`); continue; }
+            if ((m = /^[-*•]\s+(.*)$/.exec(line))) { flushP(); if (!list || list.t !== 'ul') { flushL(); list = { t: 'ul', items: [] }; } list.items.push(m[1]); continue; }
+            if ((m = /^\d+[.)]\s+(.*)$/.exec(line))) { flushP(); if (!list || list.t !== 'ol') { flushL(); list = { t: 'ol', items: [] }; } list.items.push(m[1]); continue; }
+            flushL(); para.push(line);
+        }
+        flushP(); flushL();
+        return out.join('');
+    }
+    function aiToHTML(text) {
+        let t = String(text || '').replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/^\s*```(?:html)?\s*\n?/i, '').replace(/\n?```\s*$/, '').trim();
+        if (!t) return '';
+        if (!/<\/?(p|h[1-6]|ul|ol|li|strong|em|a|br|blockquote|b|i)\b/i.test(t)) t = markdownLite(t);
+        return tidyHTML(t);
+    }
+    const AIERR_HINTS = {
+        401: 'OpenRouter did not accept your key. Check it was copied in full (it starts with sk-or-) or make a new one.',
+        402: 'OpenRouter says your account has no credit left. Free models still need a balance that is not negative.',
+        429: 'Too many requests. Free models allow about 20 a minute and 50 a day. Wait a bit and try again.'
+    };
+    async function aiGenerate(user, signal) {
+        const key = store.get(OR.keyK);
+        const wanted = store.get(OR.modelK) || OR.auto;
+        const call = async model => {
+            let r, j = null;
+            try {
+                r = await fetch(OR.url + '/chat/completions', {
+                    method: 'POST', signal,
+                    headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model, messages: [{ role: 'system', content: AI_SYSTEM }, { role: 'user', content: user }], temperature: 0.7, max_tokens: 1200 })
+                });
+            } catch (e) {
+                if (e && e.name === 'AbortError') throw e;
+                return { status: 0, j };
+            }
+            try { j = await r.json(); } catch { /* not JSON */ }
+            const status = r.ok && j && j.error ? (Number(j.error.code) || 502) : r.status;
+            return { status, j };
+        };
+        let res = await call(wanted);
+        // that model is busy / gone: let OpenRouter pick any working free model instead
+        if (res.status !== 200 && wanted !== OR.auto && [0, 404, 429, 500, 502, 503].includes(res.status)) res = await call(OR.auto);
+        if (res.status !== 200) {
+            const detail = res.j && res.j.error && res.j.error.message ? String(res.j.error.message) : '';
+            let msg = AIERR_HINTS[res.status];
+            if (!msg && res.status === 404 && /data policy|privacy/i.test(detail)) msg = 'OpenRouter blocked the free model by your privacy settings. In your OpenRouter account, open Settings → Privacy and allow free models, then try again.';
+            if (!msg && res.status === 0) msg = "Couldn't reach OpenRouter. Check your internet connection and try again.";
+            if (!msg) msg = `OpenRouter error ${res.status}${detail ? ': ' + detail.slice(0, 160) : ''}. Try again, or pick another model in Key & model.`;
+            const err = new Error(msg); err.status = res.status; throw err;
+        }
+        const c = res.j && res.j.choices && res.j.choices[0] && res.j.choices[0].message && res.j.choices[0].message.content;
+        const text = Array.isArray(c) ? c.map(x => (x && x.text) || '').join('') : c;
+        const html = aiToHTML(text);
+        if (!html) throw new Error('The AI sent back nothing. Try again, or word your request differently.');
+        return { html, model: (res.j && res.j.model) || wanted };
+    }
+    async function aiFreeModels() {
+        const r = await fetch(OR.url + '/models');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        return (j.data || []).filter(m => /:free$/.test(m.id || '')).map(m => ({ id: m.id, name: m.name || m.id })).sort((a, b) => a.name.localeCompare(b.name));
+    }
+
     function richEditor(initialHTML, { label = 'Text' } = {}) {
         const el = document.createElement('div');
         el.className = 'rte';
@@ -474,6 +579,7 @@
                     <button type="button" class="small" data-act="link" title="Add or edit a link (Ctrl+K)">🔗 Link</button>
                     <button type="button" class="small" data-act="unlink" title="Remove the link">Unlink</button>
                     <button type="button" class="small" data-act="image" title="Add a picture from a web address">🖼 Picture</button>
+                    <button type="button" class="small" data-act="ai" title="Let AI write or rewrite text">✨ AI write</button>
                 </span>
                 <span class="rte-group">
                     <select class="rte-insert" title="Insert" aria-label="Insert">
@@ -668,11 +774,151 @@
             $('.im-url', panel).focus();
         }
 
+        /* ---- AI write dialog ---- */
+        let aiAbort = null;
+        function openAIPanel() {
+            saveRange(); restoreRange(); saveRange();
+            panel.hidden = false;
+            panel.onkeydown = e => { if (e.key === 'Escape') { e.stopPropagation(); aiClose(); } };
+            if (store.get(OR.keyK)) aiMain(); else aiSettings(true);
+        }
+        function aiClose() { if (aiAbort) aiAbort.abort(); aiAbort = null; closePanel(); }
+
+        function aiSettings(first) {
+            const hasKey = !!store.get(OR.keyK);
+            const model = store.get(OR.modelK) || OR.auto;
+            panel.innerHTML = `<strong>✨ AI write: ${first ? 'set up (one time)' : 'key and model'}</strong>
+                <p class="hint">This uses OpenRouter's free AI models. Get a free key at
+                <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">openrouter.ai/keys</a> (sign in, press <b>Create key</b>, copy it) and paste it here.
+                It is stored only in this browser and never put on the website.</p>
+                <label>OpenRouter key<input type="password" class="ai-key" placeholder="${hasKey ? '•••••••• (saved, paste a new one to replace it)' : 'sk-or-v1-…'}" autocomplete="off"></label>
+                <label>Model<select class="ai-model"><option value="${esc(OR.auto)}">Automatic (picks a working free model)</option>
+                    ${model !== OR.auto ? `<option value="${esc(model)}" selected>${esc(model)}</option>` : ''}</select></label>
+                <div class="actions"><button type="button" class="small" data-ai="models">Load list of free models</button></div>
+                <div class="actions"><button type="button" class="primary" data-ai="save">Save</button>
+                    ${hasKey ? '<button type="button" data-ai="back">Back</button><button type="button" class="danger" data-ai="remove">Remove key</button>' : '<button type="button" data-ai="cancel">Cancel</button>'}</div>
+                <p class="form-status" role="status"></p>`;
+            const st = $('.form-status', panel);
+            $('[data-ai="models"]', panel).onclick = async () => {
+                st.textContent = 'Loading free models…';
+                try {
+                    const list = await aiFreeModels();
+                    const sel = $('.ai-model', panel);
+                    const cur = sel.value;
+                    sel.innerHTML = `<option value="${esc(OR.auto)}">Automatic (picks a working free model)</option>` +
+                        list.map(m => `<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('');
+                    sel.value = [...sel.options].some(o => o.value === cur) ? cur : OR.auto;
+                    st.textContent = `${list.length} free models found.`;
+                } catch { st.textContent = "Couldn't load the list. Automatic still works."; }
+            };
+            $('[data-ai="save"]', panel).onclick = () => {
+                const k = $('.ai-key', panel).value.trim();
+                if (k && !/^sk-or-/i.test(k)) { st.textContent = 'That does not look like an OpenRouter key. It should start with sk-or-'; return; }
+                if (k) store.set(OR.keyK, k);
+                if (!store.get(OR.keyK)) { st.textContent = 'Paste your OpenRouter key first.'; return; }
+                store.set(OR.modelK, $('.ai-model', panel).value);
+                aiMain();
+            };
+            const back = $('[data-ai="back"]', panel); if (back) back.onclick = aiMain;
+            const cancel = $('[data-ai="cancel"]', panel); if (cancel) cancel.onclick = aiClose;
+            const rem = $('[data-ai="remove"]', panel);
+            if (rem) rem.onclick = () => { store.del(OR.keyK); store.del(OR.modelK); aiSettings(true); };
+            $('.ai-key', panel).focus();
+        }
+
+        function aiMain() {
+            const hasSel = !!saved && !saved.collapsed;
+            panel.innerHTML = `<strong>✨ AI write</strong>
+                <label>What should it do?<select class="ai-mode">${Object.entries(AI_MODES).map(([k, m]) => `<option value="${k}">${m.label}</option>`).join('')}</select></label>
+                <label><span class="ai-ins-label">Tell it what you want</span><textarea class="ai-text" rows="3"></textarea></label>
+                <p class="hint ai-sel-hint"></p>
+                <div class="actions"><button type="button" class="primary" data-ai="go">Write it</button>
+                    <button type="button" data-ai="settings">Key &amp; model</button><button type="button" data-ai="cancel">Cancel</button></div>
+                <div class="ai-result-box" hidden>
+                    <div class="field-label">Here's what it wrote. Nothing is changed until you press Use this.</div>
+                    <div class="ai-result post-body"></div>
+                    <div class="actions"><button type="button" class="primary" data-ai="use">Use this</button>
+                        <button type="button" data-ai="again">Try again</button><button type="button" data-ai="discard">Discard</button></div>
+                </div>
+                <p class="form-status" role="status"></p>
+                <p class="hint">AI can get things wrong, so read it before you save. Free models may keep what you send, so don't include anything private.</p>`;
+            const modeSel = $('.ai-mode', panel), text = $('.ai-text', panel), st = $('.form-status', panel), selHint = $('.ai-sel-hint', panel);
+            const box = $('.ai-result-box', panel), resEl = $('.ai-result', panel);
+            let result = '';
+            modeSel.value = hasSel ? 'rewrite' : 'write';
+            const syncMode = () => {
+                const m = AI_MODES[modeSel.value];
+                text.placeholder = m.ph || '';
+                text.closest('label').hidden = !m.ph;
+                $('.ai-ins-label', panel).textContent = m.needsText ? 'Tell it what you want' : 'Extra instructions (optional)';
+                const sel = saved && !saved.collapsed;
+                selHint.textContent = m.needsSel ? (sel ? `${saved.toString().length} characters selected.` : 'First select the text you want changed in the editor, then press ✨ AI write again.') : '';
+                $('[data-ai="go"]', panel).disabled = !!(m.needsSel && !sel);
+            };
+            modeSel.onchange = syncMode;
+            syncMode();
+
+            const generate = async () => {
+                saveRange();
+                const mode = modeSel.value, m = AI_MODES[mode], instr = text.value.trim();
+                const sel = saved && !saved.collapsed;
+                if (m.needsSel && !sel) { syncMode(); return; }
+                if (m.needsText && !instr) { st.textContent = 'Say what you want written first.'; text.focus(); return; }
+                let selHTML = '', before = '';
+                if (sel) { const d = document.createElement('div'); d.appendChild(saved.cloneContents()); selHTML = tidyHTML(d.innerHTML).slice(0, 6000); }
+                if (m.needsBefore) {
+                    const r = document.createRange();
+                    r.selectNodeContents(visual); r.setEnd(saved.startContainer, saved.startOffset);
+                    before = r.toString().slice(-1500).trim();
+                    if (!before) { st.textContent = 'Write a little in the editor first, so it has something to continue from.'; return; }
+                }
+                if (aiAbort) aiAbort.abort();
+                aiAbort = new AbortController();
+                const myAbort = aiAbort;
+                const goBtn = $('[data-ai="go"]', panel);
+                goBtn.disabled = true; box.hidden = true;
+                st.textContent = 'Writing… this can take up to half a minute.';
+                const timer = setTimeout(() => myAbort.abort(), 60000);
+                try {
+                    const out = await aiGenerate(aiPrompt(mode, instr, label, selHTML, before), myAbort.signal);
+                    result = out.html;
+                    resEl.innerHTML = sanitize(result);
+                    box.hidden = false;
+                    st.textContent = 'Written by ' + out.model + '.';
+                } catch (e) {
+                    st.textContent = e && e.name === 'AbortError' ? (myAbort.signal.aborted && aiAbort === myAbort ? 'That took too long. Try again.' : 'Stopped.') : e.message;
+                } finally {
+                    clearTimeout(timer);
+                    goBtn.disabled = false;
+                    syncMode();
+                }
+            };
+            $('[data-ai="go"]', panel).onclick = generate;
+            $('[data-ai="again"]', panel).onclick = generate;
+            $('[data-ai="discard"]', panel).onclick = () => { box.hidden = true; result = ''; st.textContent = ''; };
+            $('[data-ai="settings"]', panel).onclick = () => aiSettings(false);
+            $('[data-ai="cancel"]', panel).onclick = aiClose;
+            $('[data-ai="use"]', panel).onclick = () => {
+                if (!result) return;
+                let html = result;
+                // replacing part of a sentence: drop the wrapping paragraph so the text stays inline
+                if (saved && !saved.collapsed) {
+                    const t = document.createElement('template'); t.innerHTML = html;
+                    if (t.content.children.length === 1 && t.content.firstElementChild.tagName === 'P' && t.content.childNodes.length === 1) html = t.content.firstElementChild.innerHTML;
+                }
+                aiClose();
+                insertHTMLAtCaret(html);
+                saveRange();
+            };
+            (text.closest('label').hidden ? $('[data-ai="go"]', panel) : text).focus();
+        }
+
         /* ---- toolbar wiring ---- */
         $$('[data-cmd]', el).forEach(b => { b.onclick = () => run(b.dataset.cmd); });
         $('[data-act="link"]', el).onclick = openLinkPanel;
         $('[data-act="unlink"]', el).onclick = unlink;
         $('[data-act="image"]', el).onclick = openImagePanel;
+        $('[data-act="ai"]', el).onclick = openAIPanel;
         $('[data-act="clear"]', el).onclick = () => { run('removeFormat'); setBlock('p'); };
         $('.rte-style', el).onchange = e => setBlock(e.target.value);
         $('.rte-insert', el).onchange = e => {
@@ -887,7 +1133,7 @@
         $('#ap-reload').onclick = async () => {
             try { await adminRefresh(); refreshView(); renderAdminPanel(); toast('Reloaded.'); } catch (e) { toast(e.message, true); }
         };
-        $('#ap-logout').onclick = () => { store.del(TOKEN_KEY); renderAdminPanel(); toast('Logged out.'); };
+        $('#ap-logout').onclick = () => { store.del(TOKEN_KEY); store.del(OR.keyK); store.del(OR.modelK); renderAdminPanel(); toast('Logged out.'); };
         $$('[data-edit]', el).forEach(b => b.onclick = () => openPostEditor(state.posts.find(p => p.slug === b.dataset.edit)));
         $$('[data-del]', el).forEach(b => b.onclick = () => deletePost(b.dataset.del, (state.posts.find(p => p.slug === b.dataset.del) || {}).title));
     }
