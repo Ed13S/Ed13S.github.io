@@ -10,7 +10,7 @@
     // ===== AI WRITE KEY ==========================================================
     // Paste your OpenRouter key between the quotes on the next line (it starts with sk-or-).
     // Leave it as '' and the editor will ask for the key instead and keep it in your browser.
-    const OPENROUTER_KEY = '';
+    const OPENROUTER_KEY = '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';
     // =============================================================================
     const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`;
     const FORMSPREE = 'https://formspree.io/f/xgooelrv';
