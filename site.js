@@ -6,6 +6,12 @@
     'use strict';
 
     const REPO = { owner: 'ed13s', repo: 'ed13s.github.io', branch: 'main' };
+
+    // ===== AI WRITE KEY ==========================================================
+    // Paste your OpenRouter key between the quotes on the next line (it starts with sk-or-).
+    // Leave it as '' and the editor will ask for the key instead and keep it in your browser.
+    const OPENROUTER_KEY = '';
+    // =============================================================================
     const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`;
     const FORMSPREE = 'https://formspree.io/f/xgooelrv';
     const TOKEN_KEY = 'ed_gh_token';
@@ -457,6 +463,7 @@
      * The key is pasted by the admin and kept only in this browser (never in the repo),
      * and the browser talks to OpenRouter directly. */
     const OR = { url: 'https://openrouter.ai/api/v1', keyK: 'ed_or_key', modelK: 'ed_or_model', auto: 'openrouter/free' };
+    const orKey = () => OPENROUTER_KEY.trim() || store.get(OR.keyK) || '';
     const AI_SYSTEM = 'You are a writing assistant for Eddie\'s personal website about cyber security and programming. '
         + 'Reply with ONLY the finished text as simple HTML using <p>, <h2>, <h3>, <strong>, <em>, <ul>, <ol>, <li>, <a href> and <blockquote>. '
         + 'No markdown, no code fences, no introduction and no explanation. '
@@ -516,7 +523,7 @@
         429: 'Too many requests. Free models allow about 20 a minute and 50 a day. Wait a bit and try again.'
     };
     async function aiGenerate(user, signal) {
-        const key = store.get(OR.keyK);
+        const key = orKey();
         const wanted = store.get(OR.modelK) || OR.auto;
         const call = async model => {
             let r, j = null;
@@ -780,23 +787,24 @@
             saveRange(); restoreRange(); saveRange();
             panel.hidden = false;
             panel.onkeydown = e => { if (e.key === 'Escape') { e.stopPropagation(); aiClose(); } };
-            if (store.get(OR.keyK)) aiMain(); else aiSettings(true);
+            if (orKey()) aiMain(); else aiSettings(true);
         }
         function aiClose() { if (aiAbort) aiAbort.abort(); aiAbort = null; closePanel(); }
 
         function aiSettings(first) {
+            const builtIn = !!OPENROUTER_KEY.trim();
             const hasKey = !!store.get(OR.keyK);
             const model = store.get(OR.modelK) || OR.auto;
-            panel.innerHTML = `<strong>✨ AI write: ${first ? 'set up (one time)' : 'key and model'}</strong>
-                <p class="hint">This uses OpenRouter's free AI models. Get a free key at
+            panel.innerHTML = `<strong>✨ AI write: ${builtIn ? 'model' : first ? 'set up (one time)' : 'key and model'}</strong>
+                ${builtIn ? '<p class="hint">The OpenRouter key is built into the site (OPENROUTER_KEY at the top of site.js), so there is nothing to paste.</p>' : `<p class="hint">This uses OpenRouter's free AI models. Get a free key at
                 <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">openrouter.ai/keys</a> (sign in, press <b>Create key</b>, copy it) and paste it here.
                 It is stored only in this browser and never put on the website.</p>
-                <label>OpenRouter key<input type="password" class="ai-key" placeholder="${hasKey ? '•••••••• (saved, paste a new one to replace it)' : 'sk-or-v1-…'}" autocomplete="off"></label>
+                <label>OpenRouter key<input type="password" class="ai-key" placeholder="${hasKey ? '•••••••• (saved, paste a new one to replace it)' : 'sk-or-v1-…'}" autocomplete="off"></label>`}
                 <label>Model<select class="ai-model"><option value="${esc(OR.auto)}">Automatic (picks a working free model)</option>
                     ${model !== OR.auto ? `<option value="${esc(model)}" selected>${esc(model)}</option>` : ''}</select></label>
                 <div class="actions"><button type="button" class="small" data-ai="models">Load list of free models</button></div>
                 <div class="actions"><button type="button" class="primary" data-ai="save">Save</button>
-                    ${hasKey ? '<button type="button" data-ai="back">Back</button><button type="button" class="danger" data-ai="remove">Remove key</button>' : '<button type="button" data-ai="cancel">Cancel</button>'}</div>
+                    ${builtIn ? '<button type="button" data-ai="back">Back</button>' : hasKey ? '<button type="button" data-ai="back">Back</button><button type="button" class="danger" data-ai="remove">Remove key</button>' : '<button type="button" data-ai="cancel">Cancel</button>'}</div>
                 <p class="form-status" role="status"></p>`;
             const st = $('.form-status', panel);
             $('[data-ai="models"]', panel).onclick = async () => {
@@ -812,10 +820,10 @@
                 } catch { st.textContent = "Couldn't load the list. Automatic still works."; }
             };
             $('[data-ai="save"]', panel).onclick = () => {
-                const k = $('.ai-key', panel).value.trim();
+                const k = builtIn ? '' : $('.ai-key', panel).value.trim();
                 if (k && !/^sk-or-/i.test(k)) { st.textContent = 'That does not look like an OpenRouter key. It should start with sk-or-'; return; }
                 if (k) store.set(OR.keyK, k);
-                if (!store.get(OR.keyK)) { st.textContent = 'Paste your OpenRouter key first.'; return; }
+                if (!orKey()) { st.textContent = 'Paste your OpenRouter key first.'; return; }
                 store.set(OR.modelK, $('.ai-model', panel).value);
                 aiMain();
             };
@@ -823,7 +831,8 @@
             const cancel = $('[data-ai="cancel"]', panel); if (cancel) cancel.onclick = aiClose;
             const rem = $('[data-ai="remove"]', panel);
             if (rem) rem.onclick = () => { store.del(OR.keyK); store.del(OR.modelK); aiSettings(true); };
-            $('.ai-key', panel).focus();
+            const keyBox = $('.ai-key', panel);
+            if (keyBox) keyBox.focus();
         }
 
         function aiMain() {
